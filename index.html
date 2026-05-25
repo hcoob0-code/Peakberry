@@ -315,7 +315,28 @@ canvas { max-width: 100%; }
 .fg label.req::after { content: ' *'; color: var(--red); font-size: 11px; }
 
 
-/* ── Auth Screen ── */
+/* ── PIN 잠금 화면 ── */
+.pin-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #E5E7EB; border: 2px solid #D1D5DB;
+  transition: all 0.15s;
+}
+.pin-dot.filled { background: #111827; border-color: #111827; }
+.pin-dot.error  { background: #EF4444; border-color: #EF4444; }
+.pin-btn {
+  width: 100%; aspect-ratio: 1;
+  font-size: 22px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif;
+  color: var(--text-primary); background: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.85); border-radius: 50%;
+  cursor: pointer; backdrop-filter: blur(10px);
+  transition: background 0.1s, transform 0.1s;
+  display: flex; align-items: center; justify-content: center;
+}
+.pin-btn:active { background: rgba(17,24,39,0.1); transform: scale(0.93); }
+.pin-del { font-size: 18px; }
+.pin-err { font-size: 12px; color: #EF4444; min-height: 18px; margin-bottom: 10px; text-align: center; }
+
+
 #auth-screen {
   position: fixed; inset: 0; z-index: 10000;
   background: #EEF3F8;
@@ -807,89 +828,47 @@ canvas { max-width: 100%; }
 
 <!-- ══ AUTH SCREEN ══ -->
 <div id="auth-screen">
-  <div class="auth-card">
-    <div class="auth-sub" id="auth-sub-text">농장명과 접속 코드를 입력해 주세요</div>
+  <div class="auth-card" style="text-align:center;">
+    <div style="font-size:14px;font-weight:600;color:var(--text-secondary);margin-bottom:28px;">비밀번호를 입력하세요</div>
 
-    <!-- 로그인 뷰 -->
-    <div class="auth-view active" id="auth-login-view">
-      <label class="auth-label">농장명</label>
-      <input class="auth-input" type="text" id="auth-farm-id" placeholder="예) peakberry" autocomplete="off" autocapitalize="none" spellcheck="false" oninput="saveFarmIdIfRemembered()">
-      <label class="auth-label">접속 코드</label>
-      <input class="auth-input" type="tel" id="auth-code" placeholder="숫자 6자리" maxlength="6" pattern="[0-9]*" inputmode="numeric" style="letter-spacing:4px;padding-left:14px;padding-right:14px;">
-      <div style="display:flex;gap:16px;margin:8px 0 4px;">
-        <label class="auth-check-row" style="margin:0;">
-          <input type="checkbox" id="auth-remember-farm" checked onchange="toggleRememberFarmId()">
-          농장명 기억
-        </label>
-        <label class="auth-check-row" style="margin:0;">
-          <input type="checkbox" id="auth-remember" checked>
-          자동 로그인
-        </label>
-      </div>
-      <div class="auth-err" id="auth-err"></div>
-      <button class="auth-btn-primary" onclick="doLogin()">로그인</button>
-      <div class="auth-divider">또는</div>
-      <button class="auth-btn-secondary" onclick="showAuthView('register')">새 농장 등록하기</button>
-      <div class="auth-admin-link" style="font-size:11px;color:#C4C9D4;margin-top:20px;padding:10px 20px;cursor:pointer;" onclick="showAuthView('admin-login')">관리자 모드</div>
+    <!-- PIN 표시 -->
+    <div style="display:flex;justify-content:center;gap:12px;margin-bottom:28px;" id="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+      <div class="pin-dot" id="pd4"></div>
+      <div class="pin-dot" id="pd5"></div>
     </div>
 
-    <!-- 농장 등록 뷰 -->
-    <div class="auth-view" id="auth-register-view">
-      <label class="auth-label">농장명 (로그인 ID)</label>
-      <input class="auth-input" type="text" id="reg-farm-id" placeholder="예) peakberry" autocomplete="off" autocapitalize="none" spellcheck="false">
-      <label class="auth-label">접속 코드 (6자리)</label>
-      <input class="auth-input" type="tel" id="reg-code" placeholder="숫자 6자리" maxlength="6" pattern="[0-9]*" inputmode="numeric">
-      <label class="auth-label">앱에 표시될 농장 이름</label>
-      <input class="auth-input" type="text" id="reg-display-name" placeholder="예) 피크베리 농장">
-      <label class="auth-label">부제목 (선택)</label>
-      <input class="auth-input" type="text" id="reg-display-sub" placeholder="예) 수입·지출 관리">
-      <div class="auth-err" id="reg-err"></div>
-      <button class="auth-btn-primary" onclick="doRegister()">등록하고 시작하기</button>
-      <button class="auth-btn-secondary" onclick="showAuthView('login')">로그인 화면으로 이동</button>
+    <div class="pin-err" id="pin-err"></div>
+
+    <!-- 숫자 패드 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;max-width:260px;margin:0 auto;">
+      <button class="pin-btn" onclick="pinInput('1')">1</button>
+      <button class="pin-btn" onclick="pinInput('2')">2</button>
+      <button class="pin-btn" onclick="pinInput('3')">3</button>
+      <button class="pin-btn" onclick="pinInput('4')">4</button>
+      <button class="pin-btn" onclick="pinInput('5')">5</button>
+      <button class="pin-btn" onclick="pinInput('6')">6</button>
+      <button class="pin-btn" onclick="pinInput('7')">7</button>
+      <button class="pin-btn" onclick="pinInput('8')">8</button>
+      <button class="pin-btn" onclick="pinInput('9')">9</button>
+      <div></div>
+      <button class="pin-btn" onclick="pinInput('0')">0</button>
+      <button class="pin-btn pin-del" onclick="pinDelete()">⌫</button>
     </div>
 
-    <!-- 관리자 로그인 뷰 -->
-    <div class="auth-view" id="auth-admin-login-view">
-      <label class="auth-label">관리자 비밀번호</label>
-      <input class="auth-input" type="text" id="admin-pw-input" placeholder="비밀번호 입력" autocomplete="off" onkeydown="if(event.key==='Enter')doAdminLogin()">
-      <div class="auth-err" id="admin-login-err"></div>
-      <button class="auth-btn-primary" onclick="doAdminLogin()">관리자 입장</button>
-      <button class="auth-btn-secondary" onclick="showAuthView('login')">← 로그인으로</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ 관리자 패널 ══ -->
-<div id="admin-panel">
-  <div class="admin-hdr">
-    <span class="admin-hdr-title">관리자 패널</span>
-    <span class="admin-close" onclick="closeAdminPanel()">✕</span>
-  </div>
-  <div class="admin-body">
-    <div class="admin-section-title">등록된 농장</div>
-    <div id="admin-farm-list"></div>
-    <div class="admin-section-title">앱 버전 내역</div>
-    <div id="admin-version-list"></div>
-    <button class="admin-add-btn" onclick="openAdminAddVersion()">+ 버전 추가</button>
-  </div>
-</div>
-
-<!-- 관리자 접속 코드 변경 모달 -->
-<div class="alert-bg" id="adminCodeBg" onclick="if(event.target.id==='adminCodeBg')closeAdminCodeModal()">
-  <div class="alert-box" style="width:300px;">
-    <p style="font-size:15px;font-weight:700;margin-bottom:12px;">접속 코드 변경</p>
-    <p id="admin-code-farm-label" style="font-size:12px;color:#6B7280;margin-bottom:10px;"></p>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#F7F8FA;border:1px solid #E5E7EB;border-radius:12px;margin-bottom:10px;">
-      <span style="font-size:11px;color:#6B7280;">변경 전</span>
-      <span id="admin-old-code" style="font-size:17px;font-weight:700;letter-spacing:5px;color:#111827;">------</span>
-    </div>
-    <input type="tel" id="admin-new-code-input" maxlength="6" placeholder="새 코드 입력" pattern="[0-9]*" inputmode="numeric" oninput="updateAdminCodePreview()"
-      style="width:100%;padding:12px 14px;font-size:18px;font-weight:700;letter-spacing:6px;font-family:'Noto Sans KR',sans-serif;color:#111827;background:#F7F8FA;border:1.5px solid #E5E7EB;border-radius:12px;box-sizing:border-box;margin-bottom:7px;text-align:center;">
-    <div id="admin-code-preview" style="font-size:12px;color:#6B7280;min-height:18px;"></div>
-    <div id="admin-code-err" style="font-size:11px;color:#EF4444;min-height:16px;margin-bottom:8px;"></div>
-    <div style="display:flex;gap:8px;">
-      <button onclick="closeAdminCodeModal()" style="flex:1;padding:12px;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;color:#6B7280;background:#F3F4F6;border:none;border-radius:12px;cursor:pointer;">취소</button>
-      <button onclick="saveAdminCodeFromModal()" style="flex:1.5;padding:12px;font-size:13px;font-weight:700;font-family:'Noto Sans KR',sans-serif;color:white;background:#111827;border:none;border-radius:12px;cursor:pointer;">변경</button>
+    <!-- Face ID 버튼 -->
+    <div id="faceid-btn-wrap" style="display:none;margin-top:20px;">
+      <button onclick="pinTryFaceId()" style="display:flex;align-items:center;justify-content:center;gap:6px;margin:0 auto;padding:10px 20px;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;color:var(--text-secondary);background:transparent;border:1px solid var(--glass-border);border-radius:50px;cursor:pointer;backdrop-filter:blur(8px);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 2H5a2 2 0 0 0-2 2v4"/><path d="M15 2h4a2 2 0 0 1 2 2v4"/>
+          <path d="M9 22H5a2 2 0 0 1-2-2v-4"/><path d="M15 22h4a2 2 0 0 0 2-2v-4"/>
+          <path d="M9 9a3 3 0 1 1 6 0c0 2-3 3-3 5"/><circle cx="12" cy="17" r=".5" fill="currentColor"/>
+        </svg>
+        Face ID로 잠금 해제
+      </button>
     </div>
   </div>
 </div>
@@ -901,18 +880,11 @@ canvas { max-width: 100%; }
     <div class="account-farm-badge">
       <div class="account-farm-info">
         <div class="account-farm-name" id="acct-display-name">농장</div>
-        <div class="account-farm-id" id="acct-farm-id">@farmid</div>
+        <div class="account-farm-id" id="acct-farm-id">피크베리 농장</div>
       </div>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#F7F8FA;border:1px solid #E5E7EB;border-radius:12px;margin-bottom:12px;">
-      <span style="font-size:12px;color:#6B7280;">접속 코드</span>
-      <span id="acct-current-code" style="font-size:18px;font-weight:700;letter-spacing:6px;color:#111827;">——————</span>
     </div>
     <div class="account-menu-item" onclick="openFarmNameModal();closeAccountModal()">
       농장 정보 수정
-    </div>
-    <div class="account-menu-item account-logout" onclick="doLogout()">
-      로그아웃
     </div>
   </div>
 </div>
@@ -953,7 +925,7 @@ canvas { max-width: 100%; }
 <div class="hdr">
   <div class="hdr-main">
     <div>
-      <div class="hdr-title" id="farm-title" onclick="openAccountModal()">피크베리 농장</div>
+      <div class="hdr-title" id="farm-title" onclick="openFarmNameModal()">피크베리 농장</div>
       <div class="hdr-sub" id="farm-sub">수입·지출 관리</div>
     </div>
   </div>
@@ -1627,59 +1599,55 @@ canvas { max-width: 100%; }
     <div class="sf-switch-grid-2" id="sf2-z2d"></div>
   </div>
 
-</div>
-
-<!-- ══ 관수 탭 ══ -->
-<div class="sec" id="sec-irrigation">
-  <div style="padding-bottom: 8px;">
-
-    <!-- 메인 연결 카드 -->
-    <div class="sec-label">KOASIS 5000 관수 제어</div>
-    <div class="nm-flat" style="padding:20px;margin-bottom:12px;text-align:center;">
-      <div style="font-size:36px;margin-bottom:10px;">💧</div>
-      <div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:4px;">(주)서원양행 KOASIS 5000</div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:20px;">Mocha VNC를 통해 관수 컨트롤러에 연결합니다</div>
-
-      <!-- 메인 연결 버튼 -->
-      <button onclick="irrigationConnect()" id="irr-connect-btn"
-        style="width:100%;padding:16px;font-size:16px;font-weight:700;font-family:'Noto Sans KR',sans-serif;color:white;background:linear-gradient(135deg,#059669,#0EA5E9);border:none;border-radius:var(--radius-lg);cursor:pointer;box-shadow:0 4px 16px rgba(5,150,105,0.35);display:flex;align-items:center;justify-content:center;gap:10px;">
-        <span style="font-size:20px;">🖥️</span> 관수 컨트롤러 열기
+  <!-- 관수 기록 — 6구역 -->
+  <div class="sec-label" style="display:flex;align-items:center;justify-content:space-between;">
+    <span>관수 기록</span>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="font-size:7px;color:var(--text-tertiary);">(주)서원양행 KOASIS 5000 · Mocha VNC</span>
+      <button onclick="irrigationConnect()"
+        style="padding:4px 10px;font-size:10px;font-weight:700;font-family:'Noto Sans KR',sans-serif;color:white;background:linear-gradient(135deg,#059669,#0EA5E9);border:none;border-radius:50px;cursor:pointer;white-space:nowrap;">
+        관수 컨트롤러 열기
       </button>
-      <div style="font-size:11px;color:var(--text-tertiary);margin-top:10px;">Mocha VNC 앱으로 이동하여 연결합니다</div>
     </div>
-
-    <!-- 연결 정보 카드 -->
-    <div class="sec-label">연결 정보</div>
-    <div class="nm-flat" style="padding:0;margin-bottom:12px;overflow:hidden;">
-      <div id="irr-info-rows">
-        <!-- JS로 렌더 -->
-      </div>
-    </div>
-
-    <!-- 빠른 메모 카드 -->
-    <div class="sec-label">관수 메모</div>
-    <div class="nm-flat" style="padding:16px;margin-bottom:12px;">
-      <textarea id="irr-memo"
-        placeholder="관수 일정, 비료 배합 등 메모를 남겨두세요..."
-        oninput="irrigationSaveMemo()"
-        style="width:100%;min-height:100px;font-size:13px;font-family:'Noto Sans KR',sans-serif;color:var(--text-primary);background:transparent;border:none;resize:none;outline:none;line-height:1.6;"></textarea>
-    </div>
-
-    <!-- 관수 기록 카드 -->
-    <div class="sec-label" style="display:flex;align-items:center;justify-content:space-between;">
-      <span>관수 기록</span>
-      <button onclick="irrigationAddLog()" style="font-size:10px;padding:4px 12px;border-radius:50px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-secondary);font-family:'Noto Sans KR',sans-serif;cursor:pointer;">+ 기록 추가</button>
-    </div>
-    <div class="nm-flat" style="padding:0;margin-bottom:12px;overflow:hidden;">
-      <div id="irr-log-list" style="padding:0 16px;"></div>
-      <div id="irr-log-empty" style="padding:20px;text-align:center;font-size:12px;color:var(--text-tertiary);">기록이 없습니다</div>
-    </div>
-
   </div>
+  <div class="nm-flat" style="padding:14px 16px;margin-bottom:12px;">
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:12px;">
+      <div><div style="font-size:9px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;text-align:center;">1구역(L)</div>
+        <input type="number" id="irr-z1" placeholder="0" min="0" max="999" step="1" style="width:100%;padding:8px 4px;font-size:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);"></div>
+      <div><div style="font-size:9px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;text-align:center;">2구역(L)</div>
+        <input type="number" id="irr-z2" placeholder="0" min="0" max="999" step="1" style="width:100%;padding:8px 4px;font-size:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);"></div>
+      <div><div style="font-size:9px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;text-align:center;">3구역(L)</div>
+        <input type="number" id="irr-z3" placeholder="0" min="0" max="999" step="1" style="width:100%;padding:8px 4px;font-size:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);"></div>
+      <div><div style="font-size:9px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;text-align:center;">4구역(L)</div>
+        <input type="number" id="irr-z4" placeholder="0" min="0" max="999" step="1" style="width:100%;padding:8px 4px;font-size:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);"></div>
+      <div><div style="font-size:9px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;text-align:center;">5구역(L)</div>
+        <input type="number" id="irr-z5" placeholder="0" min="0" max="999" step="1" style="width:100%;padding:8px 4px;font-size:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);"></div>
+      <div><div style="font-size:9px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;text-align:center;">6구역(L)</div>
+        <input type="number" id="irr-z6" placeholder="0" min="0" max="999" step="1" style="width:100%;padding:8px 4px;font-size:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);"></div>
+    </div>
+    <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px;">저장 시 날짜·시간·조도·온도·습도가 자동으로 기록됩니다</div>
+    <button onclick="irrSaveZoneLog()" style="width:100%;padding:11px;font-size:13px;font-weight:700;font-family:'Noto Sans KR',sans-serif;background:var(--text-primary);color:white;border:none;border-radius:var(--radius-md);cursor:pointer;">저장</button>
+    <div id="irr-log-list" style="margin-top:12px;border-top:1px solid var(--glass-border);padding-top:8px;display:none;"></div>
+    <div id="irr-log-empty" style="padding:16px 0;text-align:center;font-size:12px;color:var(--text-tertiary);">기록이 없습니다</div>
+  </div>
+
+  <!-- 관수 메모 -->
+  <div class="sec-label">관수 메모</div>
+  <div class="nm-flat" style="padding:14px 16px;margin-bottom:12px;">
+    <textarea id="irr-memo"
+      placeholder="관수 일정, 비료 배합 등 메모를 남겨두세요..."
+      style="width:100%;min-height:70px;font-size:13px;font-family:'Noto Sans KR',sans-serif;color:var(--text-primary);background:transparent;border:none;resize:none;outline:none;line-height:1.6;"></textarea>
+    <div style="display:flex;justify-content:flex-end;margin-top:6px;">
+      <button onclick="irrSaveMemoWithTime()" style="padding:7px 18px;font-size:12px;font-weight:700;font-family:'Noto Sans KR',sans-serif;background:var(--text-primary);color:white;border:none;border-radius:50px;cursor:pointer;">저장</button>
+    </div>
+    <div id="irr-memo-log" style="margin-top:10px;"></div>
+  </div>
+
 </div>
 
-<div class="sec" id="sec-seedling-tab">
-  <!-- 환경 통합 카드 -->
+<!-- sec-seedling-tab DOM 유지 (숨김) -->
+<div class="sec" id="sec-seedling-tab" style="display:none!important;">
+  <!-- 환경 통합 카드 (숨김) -->
   <div class="sec-label">환경</div>
   <div class="nm-flat" style="padding:14px 16px;margin-bottom:10px;">
 
@@ -1758,7 +1726,6 @@ canvas { max-width: 100%; }
     <button onclick="saveFeedbackSection()" style="width:100%;margin-top:10px;padding:11px;font-size:13px;font-family:'Noto Sans KR',sans-serif;font-weight:600;background:var(--text-primary);color:white;border:none;border-radius:var(--radius-md);cursor:pointer;">저장</button>
   </div>
 
-
   <!-- 환경 그래프 -->
   <div class="sec-label">환경·물 사용 추이</div>
   <div class="nm-flat" style="padding:12px 16px;margin-bottom:10px;">
@@ -1776,6 +1743,7 @@ canvas { max-width: 100%; }
   <div class="nm-flat" style="padding:12px 16px;margin-bottom:12px;overflow-x:auto;">
     <div id="env-raw-table"><p class="empty-msg">조회 버튼을 눌러 데이터를 확인하세요.</p></div>
   </div>
+
 </div>
 
 <!-- ══ 기본관리 ══ -->
@@ -1809,7 +1777,6 @@ canvas { max-width: 100%; }
     </div>
   </div>
 
-  <!-- 체험 프로그램 -->
   <div class="settings-accordion" id="acc-prog">
     <div class="settings-acc-hdr" onclick="toggleAcc('prog')">
       <span class="settings-acc-title">체험 프로그램 관리</span>
@@ -1820,7 +1787,6 @@ canvas { max-width: 100%; }
     </div>
   </div>
 
-  <!-- 체험 경로 관리 -->
   <div class="settings-accordion" id="acc-route">
     <div class="settings-acc-hdr" onclick="toggleAcc('route')">
       <span class="settings-acc-title">체험 경로 관리</span>
@@ -1837,11 +1803,92 @@ canvas { max-width: 100%; }
     </div>
   </div>
 
-  <!-- 데이터 내보내기 -->
-  <!-- Ecowitt 연동 -->
+  <div class="settings-accordion" id="acc-notifications">
+    <div class="settings-acc-hdr" onclick="toggleAcc('notifications')">
+      <span class="settings-acc-title">알림 설정</span>
+      <span class="settings-acc-arrow" id="acc-arrow-notifications">▼</span>
+    </div>
+    <div class="settings-acc-body" id="acc-body-notifications">
+      <div class="nm-flat" style="padding:16px 18px;margin-bottom:8px;">
+
+        <!-- 전체 알림 마스터 스위치 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--glass-border);">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text-primary);">알림 허용</div>
+            <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">앱이 닫혀있을 때도 알림을 받습니다</div>
+          </div>
+          <div id="notif-master-wrap">
+            <button onclick="notifRequestPermission()" id="notif-permission-btn"
+              style="padding:8px 16px;font-size:12px;font-weight:700;font-family:'Noto Sans KR',sans-serif;border-radius:50px;border:none;cursor:pointer;background:#059669;color:white;">
+              권한 요청
+            </button>
+          </div>
+        </div>
+
+        <!-- FCM 토큰 상태 -->
+        <div id="notif-status" style="font-size:11px;color:var(--text-tertiary);margin-bottom:16px;padding:8px 12px;background:var(--bg);border-radius:var(--radius-sm);display:none;"></div>
+
+        <!-- 탭별 알림 설정 -->
+        <div id="notif-tab-settings"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-accordion" id="acc-pin">
+    <div class="settings-acc-hdr" onclick="toggleAcc('pin');renderPinSettings();">
+      <span class="settings-acc-title">비밀번호 설정</span>
+      <span class="settings-acc-arrow" id="acc-arrow-pin">▼</span>
+    </div>
+    <div class="settings-acc-body" id="acc-body-pin">
+      <div class="nm-flat" style="padding:16px 18px;margin-bottom:8px;">
+
+        <!-- 앱 잠금 ON/OFF -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--glass-border);">
+          <div style="font-size:13px;font-weight:600;color:var(--text-primary);">앱 잠금</div>
+          <label style="position:relative;display:inline-block;width:44px;height:24px;">
+            <input type="checkbox" id="pin-lock-toggle" onchange="pinToggleLock(this.checked)" style="opacity:0;width:0;height:0;">
+            <span id="pin-lock-track" style="position:absolute;cursor:pointer;inset:0;background:#D1D5DB;border-radius:12px;transition:0.2s;">
+              <span id="pin-lock-knob" style="position:absolute;top:3px;left:3px;width:18px;height:18px;background:white;border-radius:50%;transition:0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span>
+            </span>
+          </label>
+        </div>
+
+        <div id="pin-settings-body">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:13px;font-weight:600;color:var(--text-primary);line-height:1;">비밀번호</span>
+              <div id="pin-settings-status" style="line-height:1;display:flex;align-items:center;"></div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button onclick="pinReset()" style="padding:8px 12px;font-size:12px;font-weight:600;font-family:'Noto Sans KR',sans-serif;color:var(--text-secondary);background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-md);cursor:pointer;">초기화</button>
+              <button onclick="pinOpenSetup()" class="nm-btn-primary" style="padding:8px 16px;font-size:12px;font-weight:700;font-family:'Noto Sans KR',sans-serif;">재설정</button>
+            </div>
+          </div>
+        </div>
+        <!-- Face ID 설정 -->
+        <div id="faceid-settings-wrap" style="display:none;padding-top:12px;border-top:1px solid var(--glass-border);">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:13px;font-weight:600;color:var(--text-primary);">Face ID</span>
+              <span id="faceid-support-note" style="font-size:10px;color:#F59E0B;"></span>
+            </div>
+            <label style="position:relative;display:inline-block;width:44px;height:24px;">
+              <input type="checkbox" id="faceid-toggle" onchange="pinToggleFaceId(this.checked)" style="opacity:0;width:0;height:0;">
+              <span id="faceid-toggle-track" style="position:absolute;cursor:pointer;inset:0;background:#D1D5DB;border-radius:12px;transition:0.2s;">
+                <span id="faceid-toggle-knob" style="position:absolute;top:3px;left:3px;width:18px;height:18px;background:white;border-radius:50%;transition:0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span>
+              </span>
+            </label>
+          </div>
+          <div id="faceid-status" style="font-size:11px;color:var(--text-tertiary);margin-top:4px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="settings-accordion" id="acc-ecowitt">
     <div class="settings-acc-hdr" onclick="toggleAcc('ecowitt')">
-      <span class="settings-acc-title">Ecowitt 연동</span>
+      <span class="settings-acc-title">Ecowitt 설정</span>
       <span class="settings-acc-arrow" id="acc-arrow-ecowitt">▼</span>
     </div>
     <div class="settings-acc-body" id="acc-body-ecowitt">
@@ -2027,8 +2074,6 @@ canvas { max-width: 100%; }
     </div>
   </div>
 
-
-  <!-- 데이터 기간 삭제 -->
   <div class="settings-accordion" id="acc-delrange">
     <div class="settings-acc-hdr" onclick="toggleAcc('delrange')">
       <span class="settings-acc-title">데이터 기간 삭제</span>
@@ -2048,40 +2093,6 @@ canvas { max-width: 100%; }
         </div>
         <button onclick="confirmDeleteRangeData()" style="width:100%;padding:13px;font-size:13px;font-family:'Noto Sans KR',sans-serif;font-weight:700;color:white;background:var(--red);border:none;border-radius:var(--radius-md);cursor:pointer;">선택 기간 삭제</button>
         <div id="delete-range-result" style="min-height:18px;margin-top:10px;font-size:12px;color:var(--text-secondary);line-height:1.5;"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 데이터 초기화 -->
-  <!-- 알림 설정 -->
-  <div class="settings-accordion" id="acc-notifications">
-    <div class="settings-acc-hdr" onclick="toggleAcc('notifications')">
-      <span class="settings-acc-title">🔔 알림 설정</span>
-      <span class="settings-acc-arrow" id="acc-arrow-notifications">▼</span>
-    </div>
-    <div class="settings-acc-body" id="acc-body-notifications">
-      <div class="nm-flat" style="padding:16px 18px;margin-bottom:8px;">
-
-        <!-- 전체 알림 마스터 스위치 -->
-        <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--glass-border);">
-          <div>
-            <div style="font-size:14px;font-weight:700;color:var(--text-primary);">알림 허용</div>
-            <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">앱이 닫혀있을 때도 알림을 받습니다</div>
-          </div>
-          <div id="notif-master-wrap">
-            <button onclick="notifRequestPermission()" id="notif-permission-btn"
-              style="padding:8px 16px;font-size:12px;font-weight:700;font-family:'Noto Sans KR',sans-serif;border-radius:50px;border:none;cursor:pointer;background:#059669;color:white;">
-              권한 요청
-            </button>
-          </div>
-        </div>
-
-        <!-- FCM 토큰 상태 -->
-        <div id="notif-status" style="font-size:11px;color:var(--text-tertiary);margin-bottom:16px;padding:8px 12px;background:var(--bg);border-radius:var(--radius-sm);display:none;"></div>
-
-        <!-- 탭별 알림 설정 -->
-        <div id="notif-tab-settings"></div>
-
       </div>
     </div>
   </div>
@@ -2107,9 +2118,72 @@ canvas { max-width: 100%; }
     </div>
   </div>
 
+
 </div>
 
 </div><!-- .app -->
+
+<!-- PIN 설정 모달 -->
+<div id="pin-setup-modal" style="display:none;position:fixed;inset:0;background:rgba(26,28,35,0.45);z-index:600;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
+  <div style="background:rgba(255,255,255,0.97);border-radius:24px;padding:28px 24px;width:calc(100% - 48px);max-width:320px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:20px;" id="pin-setup-title">새 비밀번호 입력</div>
+    <!-- 도트 -->
+    <div style="display:flex;justify-content:center;gap:12px;margin-bottom:10px;">
+      <div class="pin-dot" id="psd0"></div>
+      <div class="pin-dot" id="psd1"></div>
+      <div class="pin-dot" id="psd2"></div>
+      <div class="pin-dot" id="psd3"></div>
+      <div class="pin-dot" id="psd4"></div>
+      <div class="pin-dot" id="psd5"></div>
+    </div>
+    <div class="pin-err" id="pin-setup-err" style="margin-bottom:14px;"></div>
+    <!-- 숫자 패드 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;max-width:240px;margin:0 auto 16px;">
+      <button class="pin-btn" onclick="pinSetInput('1')">1</button>
+      <button class="pin-btn" onclick="pinSetInput('2')">2</button>
+      <button class="pin-btn" onclick="pinSetInput('3')">3</button>
+      <button class="pin-btn" onclick="pinSetInput('4')">4</button>
+      <button class="pin-btn" onclick="pinSetInput('5')">5</button>
+      <button class="pin-btn" onclick="pinSetInput('6')">6</button>
+      <button class="pin-btn" onclick="pinSetInput('7')">7</button>
+      <button class="pin-btn" onclick="pinSetInput('8')">8</button>
+      <button class="pin-btn" onclick="pinSetInput('9')">9</button>
+      <div></div>
+      <button class="pin-btn" onclick="pinSetInput('0')">0</button>
+      <button class="pin-btn pin-del" onclick="pinSetDelete()">⌫</button>
+    </div>
+    <button onclick="document.getElementById('pin-setup-modal').style.display='none';_pinBuffer='';" style="width:100%;padding:12px;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;color:var(--text-secondary);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;">취소</button>
+  </div>
+</div>
+
+<!-- 관수 기록 수정 모달 -->
+<div class="modal-bg" id="irrEditModal" onclick="if(event.target.id==='irrEditModal')closeIrrEditModal()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>관수 기록 수정</h3>
+    <input type="hidden" id="irr-edit-idx">
+
+    <div class="fg">
+      <label>날짜 · 시간</label>
+      <input type="datetime-local" id="irr-edit-dt"
+        style="width:100%;padding:12px 14px;font-size:14px;font-family:'Noto Sans KR',sans-serif;color:var(--text-primary);background:rgba(240,245,252,0.6);border:1px solid var(--glass-border);border-radius:var(--radius-md);">
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:12px;">
+      <div class="fg" style="margin:0;"><label style="font-size:9px;text-align:center;display:block;">1구역(L)</label><input type="number" id="irr-edit-z1" min="0" max="999" step="1" style="width:100%;padding:8px 4px;font-size:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;background:rgba(240,245,252,0.6);border:1px solid var(--glass-border);border-radius:var(--radius-md);color:var(--text-primary);"></div>
+      <div class="fg" style="margin:0;"><label style="font-size:9px;text-align:center;display:block;">2구역(L)</label><input type="number" id="irr-edit-z2" min="0" max="999" step="1" style="width:100%;padding:8px 4px;font-size:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;background:rgba(240,245,252,0.6);border:1px solid var(--glass-border);border-radius:var(--radius-md);color:var(--text-primary);"></div>
+      <div class="fg" style="margin:0;"><label style="font-size:9px;text-align:center;display:block;">3구역(L)</label><input type="number" id="irr-edit-z3" min="0" max="999" step="1" style="width:100%;padding:8px 4px;font-size:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;background:rgba(240,245,252,0.6);border:1px solid var(--glass-border);border-radius:var(--radius-md);color:var(--text-primary);"></div>
+      <div class="fg" style="margin:0;"><label style="font-size:9px;text-align:center;display:block;">4구역(L)</label><input type="number" id="irr-edit-z4" min="0" max="999" step="1" style="width:100%;padding:8px 4px;font-size:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;background:rgba(240,245,252,0.6);border:1px solid var(--glass-border);border-radius:var(--radius-md);color:var(--text-primary);"></div>
+      <div class="fg" style="margin:0;"><label style="font-size:9px;text-align:center;display:block;">5구역(L)</label><input type="number" id="irr-edit-z5" min="0" max="999" step="1" style="width:100%;padding:8px 4px;font-size:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;background:rgba(240,245,252,0.6);border:1px solid var(--glass-border);border-radius:var(--radius-md);color:var(--text-primary);"></div>
+      <div class="fg" style="margin:0;"><label style="font-size:9px;text-align:center;display:block;">6구역(L)</label><input type="number" id="irr-edit-z6" min="0" max="999" step="1" style="width:100%;padding:8px 4px;font-size:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;background:rgba(240,245,252,0.6);border:1px solid var(--glass-border);border-radius:var(--radius-md);color:var(--text-primary);"></div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="modal-cancel" onclick="closeIrrEditModal()">취소</button>
+      <button class="modal-save" onclick="irrSaveEdit()">저장</button>
+    </div>
+  </div>
+</div>
 
 <!-- SMS 붙여넣기 팝업 -->
 <div class="sms-modal-bg" id="smsModal" onclick="closeSMSModalBg(event)">
@@ -2202,36 +2276,14 @@ canvas { max-width: 100%; }
     <p style="font-size:15px;font-weight:700;margin-bottom:12px;">농장 정보 수정</p>
     <p style="font-size:11px;color:var(--text-secondary);margin-bottom:5px;text-align:left;">농장 이름</p>
     <input type="text" id="farm-name-input" placeholder="예) 가나다 농장"
-      style="width:100%;padding:12px 14px;font-size:12px;color:var(--text-tertiary);font-family:'Noto Sans KR',sans-serif;color:var(--text-primary);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:10px;">
+      style="width:100%;padding:12px 14px;font-size:12px;font-family:'Noto Sans KR',sans-serif;color:var(--text-primary);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:10px;">
     <p style="font-size:11px;color:var(--text-secondary);margin-bottom:5px;text-align:left;">부제목</p>
     <input type="text" id="farm-sub-input" placeholder="예) 수입·지출 관리"
-      style="width:100%;padding:12px 14px;font-size:12px;color:var(--text-tertiary);font-family:'Noto Sans KR',sans-serif;color:var(--text-primary);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:14px;">
-    <p style="font-size:11px;color:var(--text-secondary);margin-bottom:6px;text-align:left;">어플 아이콘 변경</p>
-    <label style="display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;font-size:12px;font-weight:600;font-family:'Noto Sans KR',sans-serif;color:var(--text-secondary);background:var(--bg);border:1px dashed var(--border);border-radius:var(--radius-md);cursor:pointer;margin-bottom:8px;">
-      📷 PNG 업로드
-      <input type="file" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="onFarmIconFileChange(event)">
-    </label>
-    <div style="margin-bottom:8px;">
-      <button type="button" onclick="showFarmCodeEditor()" id="farm-code-toggle-btn" style="width:100%;padding:10px;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;color:var(--text-primary);background:#E5E7EB;border:none;border-radius:var(--radius-md);cursor:pointer;text-align:center;">접속 코드 변경</button>
-      <div id="farm-code-editor" style="display:none;margin-top:8px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);">
-        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">현재 코드</div>
-        <div id="farm-current-code-display" style="font-size:16px;font-weight:700;letter-spacing:5px;color:var(--text-primary);margin-bottom:10px;">——————</div>
-        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">변경할 코드</div>
-        <input type="tel" id="farm-new-code-input" maxlength="6" placeholder="숫자 6자리" pattern="[0-9]*" inputmode="numeric" oninput="updateFarmCodePreview()"
-          style="width:100%;padding:9px 14px;font-size:16px;font-weight:700;letter-spacing:5px;font-family:'Noto Sans KR',sans-serif;color:var(--text-primary);background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:var(--radius-md);text-align:center;box-sizing:border-box;margin-bottom:8px;--placeholder-size:12px;">
-        <div id="farm-code-preview" style="display:none;"></div>
-        <div id="farm-code-err" style="font-size:11px;color:#EF4444;min-height:14px;margin-bottom:6px;"></div>
-        <div style="display:flex;gap:8px;">
-          <button type="button" onclick="document.getElementById('farm-code-editor').style.display='none';document.getElementById('farm-new-code-input').value='';document.getElementById('farm-code-err').textContent='';" style="flex:1;padding:10px;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;color:var(--text-secondary);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;">취소</button>
-          <button type="button" onclick="saveFarmCodeOnly()" style="flex:1;padding:10px;font-size:13px;font-weight:700;font-family:'Noto Sans KR',sans-serif;color:white;background:var(--text-primary);border:none;border-radius:var(--radius-md);cursor:pointer;">저장</button>
-        </div>
-      </div>
-    </div>
+      style="width:100%;padding:12px 14px;font-size:12px;font-family:'Noto Sans KR',sans-serif;color:var(--text-primary);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:14px;">
     <div style="display:flex;gap:8px;">
       <button onclick="closeFarmNameModal()" style="flex:1;padding:12px;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;color:var(--text-secondary);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;">취소</button>
       <button id="farm-save-btn" onclick="saveFarmName()" style="flex:1;padding:12px;font-size:13px;font-weight:700;font-family:'Noto Sans KR',sans-serif;color:white;background:var(--text-primary);border:none;border-radius:var(--radius-md);cursor:pointer;">저장</button>
     </div>
-    <button onclick="confirmDeleteFarm()" style="width:100%;margin-top:8px;padding:10px;font-size:12px;font-family:'Noto Sans KR',sans-serif;font-weight:600;color:var(--red);background:transparent;border:none;cursor:pointer;text-decoration:underline;text-underline-offset:2px;">계정 삭제</button>
   </div>
 </div>
 
@@ -2464,24 +2516,9 @@ function doChangeCode(){
 
 // ── 계정 모달 ──
 function openAccountModal(){
-  var farmId=_currentFarmId||'';
-  var dn=document.getElementById('farm-title')?.textContent||farmId;
+  var dn=document.getElementById('farm-title')?.textContent||'피크베리 농장';
   var an=document.getElementById('acct-display-name');if(an)an.textContent=dn;
-  var ai=document.getElementById('acct-farm-id');if(ai)ai.textContent='@'+farmId;
-  var codeEl=document.getElementById('acct-current-code');
-  if(codeEl){
-    // 로컬 캐시에서 즉시 표시
-    try{
-      var local=JSON.parse(localStorage.getItem('pb8_farm_local_'+farmId)||'null');
-      codeEl.textContent=(local&&local.code)?local.code:'···';
-    }catch(e){codeEl.textContent='···';}
-    // Firebase에서 최신값 업데이트
-    if(farmId){
-      authFbGet('farms/'+farmId).then(function(farm){
-        if(farm&&codeEl) codeEl.textContent=farm.code||codeEl.textContent;
-      });
-    }
-  }
+  var ai=document.getElementById('acct-farm-id');if(ai)ai.textContent='피크베리 농장';
   document.getElementById('account-modal').classList.add('open');
 }
 function closeAccountModal(){document.getElementById('account-modal').classList.remove('open');}
@@ -2641,24 +2678,366 @@ function adminDeleteVersion(k){
   authFbDelete('versions/'+k).then(function(){renderAdminVersions();});
 }
 
-// ── 엔터키 로그인 지원 ──
-document.getElementById('auth-code').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
-document.getElementById('auth-farm-id').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('auth-code').focus();});
+// ── 엔터키 지원 제거(auth 입력 없음) / 앱 시작 ──
 
-// ── 앱 시작: 자동 로그인 체크 ──
-(function(){
-  var autoLoggedIn = checkAutoLogin();
-  if(!autoLoggedIn){
-    // 저장된 농장명 자동 채우기
-    var savedFarmId = localStorage.getItem('pb8_saved_farm_id');
-    var rememberFarm=document.getElementById('auth-remember-farm');
-    if(rememberFarm) rememberFarm.checked=!!savedFarmId;
-    if(savedFarmId){
-      var farmInput = document.getElementById('auth-farm-id');
-      if(farmInput) farmInput.value = savedFarmId;
+// ═══════════════════════════════════════════
+// PIN 잠금 시스템
+// ═══════════════════════════════════════════
+var PIN_KEY        = 'pb8_pin';
+var PIN_LOCK_KEY   = 'pb8_pin_lock_enabled';
+var PIN_SKIP_KEY   = 'pb8_pin_skip';
+var DEFAULT_PIN    = '';
+var _pinBuffer     = '';
+
+function pinGetSaved() { return localStorage.getItem(PIN_KEY) || ''; }
+function pinIsLockEnabled() {
+  // 잠금 기본값: PIN이 설정돼 있으면 ON, 없으면 OFF
+  var v = localStorage.getItem(PIN_LOCK_KEY);
+  if (v === null) return !!pinGetSaved();
+  return v === 'true';
+}
+function pinToggleLock(enabled) {
+  localStorage.setItem(PIN_LOCK_KEY, enabled ? 'true' : 'false');
+  var body = document.getElementById('pin-settings-body');
+  if (body) body.style.display = enabled ? 'block' : 'none';
+  renderPinSettings();
+  if (typeof showSaveToast === 'function') showSaveToast(enabled ? '앱 잠금이 활성화되었습니다' : '앱 잠금이 해제되었습니다');
+}
+
+function pinInput(d) {
+  if (_pinBuffer.length >= 6) return;
+  _pinBuffer += d;
+  pinRenderDots();
+  if (_pinBuffer.length === 6) {
+    setTimeout(pinVerify, 120);
+  }
+}
+
+function pinDelete() {
+  if (_pinBuffer.length === 0) return;
+  _pinBuffer = _pinBuffer.slice(0, -1);
+  pinRenderDots();
+  pinClearError();
+}
+
+function pinRenderDots(state) {
+  for (var i = 0; i < 6; i++) {
+    var dot = document.getElementById('pd' + i);
+    if (!dot) continue;
+    dot.className = 'pin-dot';
+    if (state === 'error') dot.classList.add('error');
+    else if (i < _pinBuffer.length) dot.classList.add('filled');
+  }
+}
+
+function pinClearError() {
+  var e = document.getElementById('pin-err');
+  if (e) e.textContent = '';
+  pinRenderDots();
+}
+
+function pinVerify() {
+  var saved = pinGetSaved();
+  // PIN이 설정되지 않은 경우 바로 통과
+  if (!saved) { pinEnterApp(); return; }
+  if (_pinBuffer === saved) {
+    pinEnterApp();
+  } else {
+    pinRenderDots('error');
+    var e = document.getElementById('pin-err');
+    if (e) e.textContent = '비밀번호가 올바르지 않습니다';
+    setTimeout(function() {
+      _pinBuffer = '';
+      pinClearError();
+    }, 900);
+  }
+}
+
+function pinEnterApp() {
+  _PB8_PREFIX = 'pb8_peakberry_';
+  _currentFarmId = 'peakberry';
+  // 앱 이름/아이콘 적용
+  var fn = localStorage.getItem('pb8_farmname') || '피크베리 농장';
+  var fs = localStorage.getItem('pb8_farmsub')  || '수입·지출 관리';
+  var fi = localStorage.getItem('pb8_appicon')  || '🍓';
+  var t = document.getElementById('farm-title'); if (t) t.textContent = fn;
+  var s = document.getElementById('farm-sub');   if (s) s.textContent = fs;
+  applyFarmIcon(fi);
+  // auth 화면 숨김
+  var authScreen = document.getElementById('auth-screen');
+  if (authScreen) authScreen.classList.add('hidden');
+  if (typeof showTab === 'function') showTab('smartfarm');
+  if (typeof window.loadAllFromFirebase === 'function') window.loadAllFromFirebase();
+}
+
+// PIN 설정 함수 (설정 탭에서 호출)
+var _pinSetStep = 0;
+var _pinSetFirst = '';
+
+function pinOpenSetup() {
+  _pinSetStep = 0;
+  _pinSetFirst = '';
+  _pinBuffer = '';
+  pinRenderDots();
+  // PIN 설정 모달 열기
+  var modal = document.getElementById('pin-setup-modal');
+  if (modal) {
+    document.getElementById('pin-setup-title').textContent = '새 비밀번호 입력';
+    document.getElementById('pin-setup-err').textContent = '';
+    for (var i = 0; i < 6; i++) {
+      var d = document.getElementById('psd' + i);
+      if (d) d.className = 'pin-dot';
+    }
+    modal.style.display = 'flex';
+  }
+}
+
+function pinSetInput(d) {
+  if (_pinBuffer.length >= 6) return;
+  _pinBuffer += d;
+  // 설정 모달 도트 렌더
+  for (var i = 0; i < 6; i++) {
+    var dot = document.getElementById('psd' + i);
+    if (!dot) continue;
+    dot.className = 'pin-dot' + (i < _pinBuffer.length ? ' filled' : '');
+  }
+  if (_pinBuffer.length === 6) setTimeout(pinSetNext, 120);
+}
+
+function pinSetDelete() {
+  if (_pinBuffer.length === 0) return;
+  _pinBuffer = _pinBuffer.slice(0, -1);
+  for (var i = 0; i < 6; i++) {
+    var dot = document.getElementById('psd' + i);
+    if (dot) dot.className = 'pin-dot' + (i < _pinBuffer.length ? ' filled' : '');
+  }
+}
+
+function pinSetNext() {
+  if (_pinSetStep === 0) {
+    _pinSetFirst = _pinBuffer;
+    _pinBuffer = '';
+    _pinSetStep = 1;
+    document.getElementById('pin-setup-title').textContent = '비밀번호 확인 (재입력)';
+    for (var i = 0; i < 6; i++) {
+      var d = document.getElementById('psd' + i);
+      if (d) d.className = 'pin-dot';
+    }
+  } else {
+    if (_pinBuffer === _pinSetFirst) {
+      localStorage.setItem(PIN_KEY, _pinBuffer);
+      document.getElementById('pin-setup-modal').style.display = 'none';
+      _pinBuffer = '';
+      if (typeof showSaveToast === 'function') showSaveToast('비밀번호가 설정되었습니다');
+      renderPinSettings();
+    } else {
+      var e = document.getElementById('pin-setup-err');
+      if (e) e.textContent = '비밀번호가 일치하지 않습니다. 다시 입력하세요.';
+      _pinBuffer = '';
+      _pinSetStep = 0;
+      _pinSetFirst = '';
+      document.getElementById('pin-setup-title').textContent = '새 비밀번호 입력';
+      for (var i = 0; i < 6; i++) {
+        var d = document.getElementById('psd' + i);
+        if (d) d.className = 'pin-dot';
+      }
     }
   }
-})();
+}
+
+function pinRemove() {
+  if (!confirm('비밀번호를 삭제하면 잠금이 해제됩니다. 계속하시겠습니까?')) return;
+  localStorage.removeItem(PIN_KEY);
+  if (typeof showSaveToast === 'function') showSaveToast('비밀번호가 삭제되었습니다');
+  renderPinSettings();
+}
+
+function pinReset() {
+  if (!confirm('비밀번호를 000000으로 초기화하시겠습니까?')) return;
+  localStorage.setItem(PIN_KEY, '000000');
+  if (typeof showSaveToast === 'function') showSaveToast('비밀번호가 000000으로 초기화되었습니다');
+  renderPinSettings();
+}
+
+var FACEID_KEY = 'pb8_faceid_enabled';
+var FACEID_CRED_KEY = 'pb8_faceid_cred_id';
+
+function pinIsFaceIdEnabled() {
+  return localStorage.getItem(FACEID_KEY) === 'true';
+}
+
+// Face ID 지원 여부 확인
+async function pinCheckFaceIdSupport() {
+  try {
+    return !!(window.PublicKeyCredential &&
+      await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());
+  } catch(e) { return false; }
+}
+
+// Face ID 등록 (처음 활성화 시)
+async function pinRegisterFaceId() {
+  try {
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const cred = await navigator.credentials.create({
+      publicKey: {
+        challenge,
+        rp: { name: '피크베리 농장', id: location.hostname || 'localhost' },
+        user: { id: new TextEncoder().encode('peakberry'), name: 'peakberry', displayName: '피크베리 농장' },
+        pubKeyCredParams: [{ alg: -7, type: 'public-key' }, { alg: -257, type: 'public-key' }],
+        authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' },
+        timeout: 30000,
+      }
+    });
+    // credentialId 저장
+    const credId = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+    localStorage.setItem(FACEID_CRED_KEY, credId);
+    localStorage.setItem(FACEID_KEY, 'true');
+    return true;
+  } catch(e) {
+    console.warn('Face ID 등록 실패:', e);
+    return false;
+  }
+}
+
+// Face ID 인증
+async function pinAuthFaceId() {
+  try {
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const credIdStr = localStorage.getItem(FACEID_CRED_KEY);
+    const allowCreds = credIdStr ? [{
+      id: Uint8Array.from(atob(credIdStr), c => c.charCodeAt(0)),
+      type: 'public-key'
+    }] : [];
+    await navigator.credentials.get({
+      publicKey: {
+        challenge,
+        allowCredentials: allowCreds,
+        userVerification: 'required',
+        timeout: 30000,
+      }
+    });
+    return true;
+  } catch(e) {
+    console.warn('Face ID 인증 실패:', e);
+    return false;
+  }
+}
+
+// 잠금 화면에서 Face ID 버튼 누를 때
+async function pinTryFaceId() {
+  var ok = await pinAuthFaceId();
+  if (ok) {
+    pinEnterApp();
+  } else {
+    var e = document.getElementById('pin-err');
+    if (e) e.textContent = 'Face ID 인증에 실패했습니다. 비밀번호를 입력하세요.';
+  }
+}
+
+// 설정에서 Face ID 토글
+async function pinToggleFaceId(checked) {
+  var statusEl = document.getElementById('faceid-status');
+  var trackEl  = document.getElementById('faceid-toggle-track');
+  var knobEl   = document.getElementById('faceid-toggle-knob');
+  if (checked) {
+    var supported = await pinCheckFaceIdSupport();
+    if (!supported) {
+      if (statusEl) statusEl.textContent = '이 기기에서는 Face ID를 지원하지 않습니다.';
+      document.getElementById('faceid-toggle').checked = false;
+      return;
+    }
+    if (statusEl) statusEl.textContent = 'Face ID 등록 중...';
+    var ok = await pinRegisterFaceId();
+    if (ok) {
+      if (trackEl) trackEl.style.background = '#059669';
+      if (knobEl)  knobEl.style.left = '23px';
+      if (statusEl) statusEl.textContent = '✓ Face ID가 활성화되었습니다.';
+      if (typeof showSaveToast === 'function') showSaveToast('Face ID가 설정되었습니다');
+      pinShowFaceIdBtn();
+    } else {
+      document.getElementById('faceid-toggle').checked = false;
+      localStorage.removeItem(FACEID_KEY);
+      if (statusEl) statusEl.textContent = 'Face ID 등록에 실패했습니다. 다시 시도해 주세요.';
+    }
+  } else {
+    localStorage.removeItem(FACEID_KEY);
+    localStorage.removeItem(FACEID_CRED_KEY);
+    if (trackEl) trackEl.style.background = '#D1D5DB';
+    if (knobEl)  knobEl.style.left = '3px';
+    if (statusEl) statusEl.textContent = 'Face ID가 비활성화되었습니다.';
+    var btn = document.getElementById('faceid-btn-wrap');
+    if (btn) btn.style.display = 'none';
+  }
+}
+
+// 잠금 화면에 Face ID 버튼 표시
+function pinShowFaceIdBtn() {
+  var wrap = document.getElementById('faceid-btn-wrap');
+  if (!wrap) return;
+  if (pinGetSaved() && pinIsFaceIdEnabled()) {
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+// renderPinSettings 에 Face ID 상태 반영
+var _origRenderPinSettings = null;
+function renderPinSettings() {
+  // 잠금 ON/OFF 토글
+  var lockEnabled = pinIsLockEnabled();
+  var cb = document.getElementById('pin-lock-toggle');
+  var track = document.getElementById('pin-lock-track');
+  var knob  = document.getElementById('pin-lock-knob');
+  if (cb)    cb.checked             = lockEnabled;
+  if (track) track.style.background = lockEnabled ? '#059669' : '#D1D5DB';
+  if (knob)  knob.style.left        = lockEnabled ? '23px' : '3px';
+  // 비밀번호 설정 영역 표시/숨김
+  var body = document.getElementById('pin-settings-body');
+  if (body) body.style.display = lockEnabled ? 'block' : 'none';
+
+  var el = document.getElementById('pin-settings-status');
+  if (el) {
+    var has = !!pinGetSaved();
+    el.innerHTML = has
+      ? '<span style="font-size:11px;color:#16A34A;">✓ 설정됨</span>'
+      : '<span style="font-size:11px;color:#9CA3AF;">미설정</span>';
+  }
+  // Face ID 섹션 — 항상 표시, 지원 여부는 비동기로 확인
+  var wrap = document.getElementById('faceid-settings-wrap');
+  if (wrap) wrap.style.display = 'block';
+
+  var enabled = pinIsFaceIdEnabled();
+  var cb    = document.getElementById('faceid-toggle');
+  var track = document.getElementById('faceid-toggle-track');
+  var knob  = document.getElementById('faceid-toggle-knob');
+  var statusEl = document.getElementById('faceid-status');
+  if (cb)    cb.checked           = enabled;
+  if (track) track.style.background = enabled ? '#059669' : '#D1D5DB';
+  if (knob)  knob.style.left       = enabled ? '23px' : '3px';
+  if (statusEl) statusEl.textContent = enabled ? '✓ Face ID 활성화됨' : '';
+
+  // 지원 여부 비동기 확인 (미지원 시 안내 문구만)
+  pinCheckFaceIdSupport().then(function(supported) {
+    var note = document.getElementById('faceid-support-note');
+    if (note) note.textContent = supported ? '' : '이 기기에서 지원하지 않을 수 있습니다';
+  }).catch(function() {});
+}
+
+// ── 앱 시작 (모든 JS 로드 후 실행) ──
+// → 파일 맨 끝 DOMContentLoaded에서 호출됨
+
+// 기존 코드 호환 스텁
+function doLogin(){}
+function doLogout(){ var a=document.getElementById('auth-screen'); if(a){_pinBuffer='';pinRenderDots();a.classList.remove('hidden');} closeAccountModal&&closeAccountModal(); }
+function doRegister(){}
+function showAuthView(){}
+function checkAutoLogin(){ return true; }
+function doAdminLogin(){}
+function openAdminPanel(){}
+function closeAdminPanel(){}
+
+
 
 const NOW = new Date();
 let curModal = null, editIdx = -1, lChart = null, pChart = null, sChart = null;
@@ -2925,8 +3304,8 @@ function saveFarmName(){
 
 
 // Firebase 없이 동작하는 스텁 함수들
-let _localStatusTimer=null;
-let _remoteStatusTimer=null;
+var _localStatusTimer=null;
+var _remoteStatusTimer=null;
 function showSyncStatus(s) {
   var localEl = document.getElementById('sync-status-local');
   var remoteEl = document.getElementById('sync-status-remote');
@@ -3115,17 +3494,15 @@ function getSaveKey(tab){
 
 // 탭 정의 (id, 라벨, 아이콘)
 const TAB_DEFS = [
-  {id:'smartfarm',        label:'제어',   icon:'🎛️'},
-  {id:'smartfarm2',       label:'육묘제어', icon:'🌿'},
-  {id:'irrigation',       label:'관수',   icon:'💧'},
-  {id:'seedling-tab',     label:'육묘',   icon:'🌱'},
-  {id:'prices',           label:'시세',   icon:'📈'},
-  {id:'income',           label:'수입',   icon:'💰'},
-  {id:'expense',          label:'지출',   icon:'💸'},
-  {id:'loan',             label:'대출',   icon:'🏦'},
-  {id:'settings',         label:'⚙︎', icon:'⚙︎'},
+  {id:'smartfarm',        label:'메인',     icon:'🎛️'},
+  {id:'smartfarm2',       label:'육묘',     icon:'🌿'},
+  {id:'prices',           label:'시세',     icon:'📈'},
+  {id:'income',           label:'수입',     icon:'💰'},
+  {id:'expense',          label:'지출',     icon:'💸'},
+  {id:'loan',             label:'대출',     icon:'🏦'},
+  {id:'settings',         label:'⚙︎',   icon:'⚙︎'},
 ];
-const DEFAULT_TAB_ORDER = TAB_DEFS.map(t=>t.id);
+var DEFAULT_TAB_ORDER = TAB_DEFS.map(t=>t.id);
 
 
 function getTabOrder(){
@@ -3159,10 +3536,9 @@ function showTab(t){
   if(t==='loan')try{renderLoanList();}catch(e){console.error(e);}
   if(t==='settings'){try{renderSettings();restoreAccState();if(typeof sfNamesRender==='function')sfNamesRender();}catch(e){console.error(e);}}
   if(t==='income'||t==='expense')try{renderIncExp();renderIncExpStats();}catch(e){console.error(e);}
-  if(t==='seedling-tab')try{renderSeedlingTab();}catch(e){console.error(e);}
+  if(t==='seedling-tab')try{/* merged into smartfarm2 */}catch(e){}
   if(t==='smartfarm')try{renderSmartfarmTab();}catch(e){console.error(e);}
-  if(t==='smartfarm2')try{renderSmartfarm2Tab();}catch(e){console.error(e);}
-  if(t==='irrigation')try{renderIrrigationTab();}catch(e){console.error(e);}
+  if(t==='smartfarm2')try{renderSmartfarm2Tab();renderSeedlingTab();}catch(e){console.error(e);}
 }
 
 // 탭 드래그 앤 드롭
@@ -4942,7 +5318,7 @@ async function fetchEcowittData(){
   if(!proxyBase||!proxyBase.startsWith('http')){
     if(status)status.textContent='⚠ 프록시 URL이 설정되지 않았습니다';
     if(btn){btn.disabled=false;btn.innerHTML='⇩ Ecowitt';}
-    showAlert('설정 탭 → Ecowitt 연동에서 프록시 서버 URL을 입력하고 저장해 주세요.');
+    showAlert('설정 탭 → Ecowitt 설정에서 프록시 서버 URL을 입력하고 저장해 주세요.');
     return;
   }
   const proxyUrl=proxyBase+'/api/ecowitt'
@@ -4961,7 +5337,7 @@ async function fetchEcowittData(){
     console.error('Ecowitt fetch error:',err);
     const msg=(err.message||'').slice(0,120);
     if(status)status.textContent='⚠ 실패: '+msg;
-    showAlert('Ecowitt 데이터를 불러오지 못했습니다.\n\n원인: '+msg+'\n\n→ 설정 탭 Ecowitt 연동에서 프록시 URL을 설정해 주세요.');
+    showAlert('Ecowitt 데이터를 불러오지 못했습니다.\n\n원인: '+msg+'\n\n→ 설정 탭 Ecowitt 설정에서 프록시 URL을 설정해 주세요.');
   }finally{
     if(btn){btn.disabled=false;btn.innerHTML='⇩ Ecowitt';}
   }
@@ -5945,6 +6321,12 @@ function renderSettings(){
   if(st) st.textContent=ek.appKey&&ek.apiKey&&ek.mac?'✓ 설정 저장됨':'키를 입력하고 저장해 주세요.';
   setTimeout(initEcoMapColors, 0);
   setTimeout(applyEcoSavedStyle, 0);
+  // 알림 설정 UI
+  setTimeout(function(){
+    if(typeof notifUpdatePermissionUI==='function') notifUpdatePermissionUI();
+    if(typeof renderNotifTabSettings==='function') renderNotifTabSettings();
+    if(typeof renderPinSettings==='function') renderPinSettings();
+  }, 0);
 }
 
 function ecoInputGrey(id){
@@ -6268,54 +6650,180 @@ function delVisitRoute(i){
 
 <script>
 // ═══════════════════════════════════════════
-// 관수 탭
+// 관수 기록 시스템 (6구역 + 자동 환경 저장)
 // ═══════════════════════════════════════════
+var IRR_ZONE_LOG_KEY = 'pb8_irr_zone_log';
+var IRR_MEMO_LOG_KEY = 'pb8_irr_memo_log';
 
-var IRR_CONFIG_KEY = 'pb8_irr_config';
-var IRR_LOG_KEY    = 'pb8_irr_log';
-var IRR_MEMO_KEY   = 'pb8_irr_memo';
-
-function getIrrConfig() {
-  try { return JSON.parse(localStorage.getItem(IRR_CONFIG_KEY)||'null') || { host:'imw0188.iptime.org', port:'5900' }; } catch(e){ return { host:'imw0188.iptime.org', port:'5900' }; }
-}
-function saveIrrConfig(cfg) {
-  try { localStorage.setItem(IRR_CONFIG_KEY, JSON.stringify(cfg)); } catch(e){}
+function irrGetNowStr() {
+  var now = new Date();
+  var pad = function(n){ return n<10?'0'+n:n; };
+  return now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())
+    +' '+pad(now.getHours())+':'+pad(now.getMinutes());
 }
 
-function renderIrrigationTab() {
-  renderIrrInfoRows();
-  renderIrrLog();
-  // 메모 불러오기
-  var memoEl = document.getElementById('irr-memo');
-  if (memoEl) {
-    try { memoEl.value = localStorage.getItem(IRR_MEMO_KEY)||''; } catch(e){}
-  }
+function irrGetEnvNow() {
+  // 현재 Ecowitt 값 읽기 (sf-env 셀)
+  var light = (document.getElementById('sf2-env-light')||document.getElementById('sf-env-light')||{}).textContent||'—';
+  var temp  = (document.getElementById('sf2-env-temp') ||document.getElementById('sf-env-temp') ||{}).textContent||'—';
+  var hum   = (document.getElementById('sf2-env-hum')  ||document.getElementById('sf-env-hum')  ||{}).textContent||'—';
+  return { light: light.trim(), temp: temp.trim(), hum: hum.trim() };
 }
 
-function renderIrrInfoRows() {
-  var cfg = getIrrConfig();
-  var container = document.getElementById('irr-info-rows');
-  if (!container) return;
-  var rows = [
-    { label:'주소', id:'irr-host', value: cfg.host, placeholder:'예) imw0188.iptime.org' },
-    { label:'포트', id:'irr-port', value: cfg.port, placeholder:'5900' },
-  ];
-  container.innerHTML = rows.map(function(r, i) {
-    var border = i < rows.length-1 ? 'border-bottom:1px solid var(--glass-border);' : '';
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;'+border+'">'
-      + '<span style="font-size:13px;color:var(--text-secondary);font-weight:500;flex-shrink:0;width:48px;">'+r.label+'</span>'
-      + '<input id="'+r.id+'" value="'+r.value+'" placeholder="'+r.placeholder+'" '
-      + 'style="flex:1;text-align:right;font-size:13px;font-weight:600;font-family:\'Noto Sans KR\',sans-serif;color:var(--text-primary);background:transparent;border:none;outline:none;" '
-      + 'onchange="irrigationSaveConfig()" />'
+// 관수 메모 저장 (날짜·시간 자동)
+function irrSaveMemoWithTime() {
+  var el = document.getElementById('irr-memo');
+  var text = (el ? el.value : '').trim();
+  if (!text) { if(typeof showAlert==='function') showAlert('메모 내용을 입력해 주세요.'); return; }
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem(IRR_MEMO_LOG_KEY)||'[]'); } catch(e){}
+  arr.unshift({ dt: irrGetNowStr(), memo: text });
+  if (arr.length > 50) arr = arr.slice(0, 50);
+  localStorage.setItem(IRR_MEMO_LOG_KEY, JSON.stringify(arr));
+  if (el) el.value = '';
+  irrRenderMemoLog();
+  if(typeof showSaveToast==='function') showSaveToast('메모가 저장되었습니다');
+}
+
+function irrRenderMemoLog() {
+  var el = document.getElementById('irr-memo-log');
+  if (!el) return;
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem(IRR_MEMO_LOG_KEY)||'[]'); } catch(e){}
+  if (!arr.length) { el.innerHTML = ''; return; }
+  el.style.borderTop = '1px solid var(--glass-border)';
+  el.style.paddingTop = '8px';
+  el.innerHTML = arr.slice(0,5).map(function(m, i) {
+    return '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--glass-border);">'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:2px;">'+m.dt+'</div>'
+      + '<div style="font-size:12px;color:var(--text-primary);line-height:1.5;">'+m.memo+'</div>'
+      + '</div>'
+      + '<button onclick="irrDeleteMemo('+i+')" style="font-size:10px;padding:2px 7px;border-radius:6px;border:1px solid #FECACA;background:var(--red-soft);color:var(--red);font-family:\'Noto Sans KR\',sans-serif;cursor:pointer;flex-shrink:0;">삭제</button>'
       + '</div>';
   }).join('');
 }
 
-function irrigationSaveConfig() {
-  var host = (document.getElementById('irr-host')||{}).value || 'imw0188.iptime.org';
-  var port = (document.getElementById('irr-port')||{}).value || '5900';
-  saveIrrConfig({ host: host.trim(), port: port.trim() });
+function irrDeleteMemo(i) {
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem(IRR_MEMO_LOG_KEY)||'[]'); } catch(e){}
+  arr.splice(i, 1);
+  localStorage.setItem(IRR_MEMO_LOG_KEY, JSON.stringify(arr));
+  irrRenderMemoLog();
 }
+
+// 관수 기록 저장 (6구역 + 자동 환경)
+function irrSaveZoneLog() {
+  var zones = [1,2,3,4,5,6].map(function(n) {
+    var el = document.getElementById('irr-z'+n);
+    return el ? (parseFloat(el.value)||0) : 0;
+  });
+  var env = irrGetEnvNow();
+  var dt  = irrGetNowStr();
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem(IRR_ZONE_LOG_KEY)||'[]'); } catch(e){}
+  arr.unshift({ dt: dt, zones: zones, light: env.light, temp: env.temp, hum: env.hum });
+  if (arr.length > 100) arr = arr.slice(0, 100);
+  localStorage.setItem(IRR_ZONE_LOG_KEY, JSON.stringify(arr));
+  // 입력 초기화
+  [1,2,3,4,5,6].forEach(function(n){
+    var el = document.getElementById('irr-z'+n);
+    if (el) el.value = '';
+  });
+  irrRenderZoneLog();
+  if(typeof showSaveToast==='function') showSaveToast('관수 기록이 저장되었습니다');
+}
+
+function irrRenderZoneLog() {
+  var listEl  = document.getElementById('irr-log-list');
+  var emptyEl = document.getElementById('irr-log-empty');
+  if (!listEl) return;
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem(IRR_ZONE_LOG_KEY)||'[]'); } catch(e){}
+  if (!arr.length) {
+    listEl.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  listEl.style.display = 'block';
+  if (emptyEl) emptyEl.style.display = 'none';
+  listEl.innerHTML = arr.map(function(log, i) {
+    var total = log.zones.reduce(function(s,v){return s+(v||0);}, 0);
+    var zoneStr = log.zones.map(function(v,idx){
+      return (idx+1)+'구역 <b>'+(v||0)+'L</b>';
+    }).join(' ');
+    var envStr = '<b>'+log.light+'</b> <b>'+log.temp+'°C</b> <b>'+log.hum+'%</b>';
+    return '<div style="padding:9px 0;border-bottom:1px solid var(--glass-border);">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">'
+      + '<span style="font-size:11px;color:var(--teal);font-weight:600;">'+log.dt+'</span>'
+      + '<div style="display:flex;align-items:center;gap:5px;">'
+      + '<span style="font-size:12px;font-weight:700;color:var(--text-primary);">총 '+total+'L</span>'
+      + '<button onclick="irrEditZoneLog('+i+')" style="font-size:10px;padding:2px 7px;border-radius:6px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-secondary);font-family:\'Noto Sans KR\',sans-serif;cursor:pointer;">수정</button>'
+      + '<button onclick="irrDeleteZoneLog('+i+')" style="font-size:10px;padding:2px 7px;border-radius:6px;border:1px solid #FECACA;background:var(--red-soft);color:var(--red);font-family:\'Noto Sans KR\',sans-serif;cursor:pointer;">삭제</button>'
+      + '</div></div>'
+      + '<div style="font-size:9.5px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;letter-spacing:-0.3px;">'
+      + zoneStr + ' <span style="color:var(--text-tertiary);">|</span> ' + envStr
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function irrDeleteZoneLog(i) {
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem(IRR_ZONE_LOG_KEY)||'[]'); } catch(e){}
+  arr.splice(i, 1);
+  localStorage.setItem(IRR_ZONE_LOG_KEY, JSON.stringify(arr));
+  irrRenderZoneLog();
+}
+
+function irrEditZoneLog(i) {
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem(IRR_ZONE_LOG_KEY)||'[]'); } catch(e){}
+  var log = arr[i];
+  if (!log) return;
+  // datetime-local 형식: "YYYY-MM-DDTHH:MM"
+  var dtVal = log.dt.replace(' ', 'T');
+  document.getElementById('irr-edit-idx').value = i;
+  document.getElementById('irr-edit-dt').value  = dtVal;
+  [1,2,3,4,5,6].forEach(function(n){
+    var el = document.getElementById('irr-edit-z'+n);
+    if (el) el.value = log.zones[n-1] || 0;
+  });
+  document.getElementById('irrEditModal').classList.add('open');
+}
+
+function closeIrrEditModal() {
+  document.getElementById('irrEditModal').classList.remove('open');
+}
+
+function irrSaveEdit() {
+  var i = parseInt(document.getElementById('irr-edit-idx').value);
+  var dtRaw = document.getElementById('irr-edit-dt').value; // "YYYY-MM-DDTHH:MM"
+  if (!dtRaw) { if(typeof showAlert==='function') showAlert('날짜와 시간을 입력해 주세요.'); return; }
+  var dt = dtRaw.replace('T', ' ');
+  var zones = [1,2,3,4,5,6].map(function(n){
+    var el = document.getElementById('irr-edit-z'+n);
+    return el ? (parseInt(el.value)||0) : 0;
+  });
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem(IRR_ZONE_LOG_KEY)||'[]'); } catch(e){}
+  if (!arr[i]) return;
+  arr[i].dt    = dt;
+  arr[i].zones = zones;
+  localStorage.setItem(IRR_ZONE_LOG_KEY, JSON.stringify(arr));
+  closeIrrEditModal();
+  irrRenderZoneLog();
+  if(typeof showSaveToast==='function') showSaveToast('수정되었습니다');
+}
+
+// 구 관수 탭 함수 스텁 (호환성)
+function getIrrConfig(){ return {host:'imw0188.iptime.org',port:'5900'}; }
+function saveIrrConfig(){}
+function renderIrrigationTab(){ irrRenderZoneLog(); irrRenderMemoLog(); }
+function renderIrrInfoRows(){}
+function irrigationSaveMemo(){}
+function irrigationAddLog(){}
+function renderIrrLog(){ irrRenderZoneLog(); }
 
 function irrigationConnect() {
   var cfg = getIrrConfig();
@@ -6334,63 +6842,7 @@ function irrigationConnect() {
   }, 1800);
 }
 
-function irrigationSaveMemo() {
-  var el = document.getElementById('irr-memo');
-  if (!el) return;
-  try { localStorage.setItem(IRR_MEMO_KEY, el.value); } catch(e){}
-}
-
-// 관수 기록
-function getIrrLog() {
-  try { return JSON.parse(localStorage.getItem(IRR_LOG_KEY)||'[]'); } catch(e){ return []; }
-}
-function saveIrrLog(arr) {
-  try { localStorage.setItem(IRR_LOG_KEY, JSON.stringify(arr)); } catch(e){}
-}
-
-function irrigationAddLog() {
-  var now = new Date();
-  var pad = function(n){ return n<10?'0'+n:n; };
-  var dateStr = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-  var timeStr = pad(now.getHours())+':'+pad(now.getMinutes());
-  var memo = prompt('관수 메모 입력 (선택사항)');
-  if (memo === null) return; // 취소
-  var arr = getIrrLog();
-  arr.unshift({ date: dateStr, time: timeStr, memo: memo||'' });
-  if (arr.length > 100) arr = arr.slice(0, 100);
-  saveIrrLog(arr);
-  renderIrrLog();
-}
-
-function irrigationDeleteLog(i) {
-  var arr = getIrrLog();
-  arr.splice(i, 1);
-  saveIrrLog(arr);
-  renderIrrLog();
-}
-
-function renderIrrLog() {
-  var arr = getIrrLog();
-  var listEl = document.getElementById('irr-log-list');
-  var emptyEl = document.getElementById('irr-log-empty');
-  if (!listEl) return;
-  if (arr.length === 0) {
-    listEl.innerHTML = '';
-    if (emptyEl) emptyEl.style.display = 'block';
-    return;
-  }
-  if (emptyEl) emptyEl.style.display = 'none';
-  listEl.innerHTML = arr.map(function(log, i) {
-    var border = i < arr.length-1 ? 'border-bottom:1px solid var(--glass-border);' : '';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:11px 0;'+border+'">'
-      + '<div style="flex:1;min-width:0;">'
-      + '<div style="font-size:13px;font-weight:600;color:var(--text-primary);">'+log.date+' <span style="color:var(--teal);">'+log.time+'</span></div>'
-      + (log.memo ? '<div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">'+log.memo+'</div>' : '')
-      + '</div>'
-      + '<button onclick="irrigationDeleteLog('+i+')" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid #FECACA;background:var(--red-soft);color:var(--red);font-family:\'Noto Sans KR\',sans-serif;cursor:pointer;flex-shrink:0;">삭제</button>'
-      + '</div>';
-  }).join('');
-}
+// (구 irrigationSaveMemo, irrigationAddLog, irrigationDeleteLog, renderIrrLog 제거됨)
 
 // ═══════════════════════════════════════════
 // 육묘제어 탭 (smartfarm2)
@@ -6432,8 +6884,9 @@ function sf2Draw(id) {
   var el = document.getElementById('sf-sw-'+id);
   if (!el) return;
   var st = sf2Init(id).state;
-  var label = id; // 기본 라벨
-  SF2_ZONE_DEFS.forEach(function(z){ z.switches.forEach(function(sw){ if(sw.id===id) label=sw.defaultLabel; }); });
+  var names = sfGetNames();
+  var label = names[id+'_label'] || id;
+  SF2_ZONE_DEFS.forEach(function(z){ z.switches.forEach(function(sw){ if(sw.id===id && !names[id+'_label']) label=sw.defaultLabel; }); });
   if (!el.querySelector('.sf-track-wrap')) {
     el.innerHTML = '<div class="sf-sw-num"></div><div class="sf-track-wrap"><div class="sf-track-bg"></div><div class="sf-track-txt txt-open">열기</div><div class="sf-track-txt txt-close">닫기</div><div class="sf-knob"><span class="sf-knob-txt">정지</span></div></div>';
   }
@@ -6444,8 +6897,9 @@ function sf2Draw2(id) {
   var el = document.getElementById('sf-sw2-'+id);
   if (!el) return;
   var st = sf2Init(id).state;
-  var label = id;
-  SF2_ZONE_DEFS.forEach(function(z){ z.switches.forEach(function(sw){ if(sw.id===id) label=sw.defaultLabel; }); });
+  var names = sfGetNames();
+  var label = names[id+'_label'] || id;
+  SF2_ZONE_DEFS.forEach(function(z){ z.switches.forEach(function(sw){ if(sw.id===id && !names[id+'_label']) label=sw.defaultLabel; }); });
   if (!el.querySelector('.sf-sw2-track')) {
     el.innerHTML = '<div class="sf-sw2-num"></div><div class="sf-sw2-track"><div class="sf-sw2-knob"></div></div>';
   }
@@ -6480,6 +6934,11 @@ function renderSmartfarm2Tab() {
   sf2UpdateTempZ2d();
   sf2InitRain();
   sf2FetchNow();
+  // 관수 메모/기록 초기화
+  var memoEl = document.getElementById('irr-memo');
+  if (memoEl) { try { memoEl.value = ''; } catch(e){} }
+  if (typeof irrRenderMemoLog === 'function') irrRenderMemoLog();
+  if (typeof irrRenderZoneLog === 'function') irrRenderZoneLog();
 }
 
 function sf2AttachSlide(el, id) {
@@ -7235,7 +7694,7 @@ function sfCheckRain(rainRate) {
 }
 
 
-// ── Ecowitt 연동 체크 및 자동 로드 ──
+// ── Ecowitt 설정 체크 및 자동 로드 ──
 function sfIsEcowittLinked() {
   try {
     var k = JSON.parse(localStorage.getItem('pb8_ecowitt_keys') || 'null');
@@ -7310,45 +7769,47 @@ function sfNamesRender() {
   if (!container) return;
   var names = sfGetNames();
   var html = '';
-  SF_ZONE_DEFS.forEach(function(z, zi) {
-    var zoneName = sfGetZoneName(z.key);
-    var isSavedZone = !!names[z.key+'_name'];
-    html += '<div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">';
-    html += '<div style="font-size:10px;font-weight:700;color:var(--text-tertiary);margin-bottom:5px;">'+sfGetZoneName(z.key)+'</div>';
-    html += '<input type="text" id="sfname-zone-'+z.key+'"'
-          + ' value="'+(isSavedZone ? zoneName : '')+'"'
-          + ' placeholder="'+z.defaultName+'"'
-          + ' data-saved="'+(isSavedZone ? encodeURIComponent(zoneName) : '')+'"'
-          + ' onfocus="sfNameFocus(this)"'
-          + ' oninput="sfNameInput(this)"'
-          + ' style="display:block;width:100%;box-sizing:border-box;padding:9px 12px;font-size:13px;font-family:\'Noto Sans KR\',sans-serif;'
-          + 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);'
-          + 'color:var(--text-tertiary);margin-bottom:10px;">';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
-    z.switches.forEach(function(sw, si) {
-      var swLabel = sfGetSwLabel(sw.id);
-      var isSavedSw = !!names[sw.id+'_label'];
-      var phNum = 'スイッチ ' + (si+1);
-      // placeholder는 '스위치 1', '스위치 2' 형태
-      var ph = '스위치 ' + (si+1);
-      html += '<div>'
-            + '<div style="font-size:9px;font-weight:600;color:var(--text-tertiary);margin-bottom:3px;">'+ph+'</div>'
-            + '<input type="text" id="sfname-sw-'+sw.id+'"'
-            + ' value="'+(isSavedSw ? swLabel : '')+'"'
-            + ' placeholder="'+ph+'"'
-            + ' data-saved="'+(isSavedSw ? encodeURIComponent(swLabel) : '')+'"'
-            + ' onfocus="sfNameFocus(this)"'
-            + ' oninput="sfNameInput(this)"'
-            + ' style="width:100%;box-sizing:border-box;padding:8px 10px;font-size:12px;font-family:\'Noto Sans KR\',sans-serif;'
-            + 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);'
-            + 'color:'+(isSavedSw ? 'var(--text-tertiary)' : 'var(--text-tertiary)')+';">'
-            + '</div>';
+
+  function renderSection(title, zoneDefs) {
+    html += '<div style="font-size:10px;font-weight:700;color:var(--text-tertiary);letter-spacing:1px;margin:14px 0 8px;text-transform:uppercase;">'+title+'</div>';
+    zoneDefs.forEach(function(z) {
+      var zoneName = names[z.key+'_name'] || z.defaultName;
+      var isSavedZone = !!names[z.key+'_name'];
+      html += '<div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">';
+      html += '<div style="font-size:10px;font-weight:700;color:var(--text-tertiary);margin-bottom:5px;">'+zoneName+'</div>';
+      html += '<input type="text" id="sfname-zone-'+z.key+'"'
+            + ' value="'+(isSavedZone ? zoneName : '')+'"'
+            + ' placeholder="'+z.defaultName+'"'
+            + ' data-saved="'+(isSavedZone ? encodeURIComponent(zoneName) : '')+'"'
+            + ' onfocus="sfNameFocus(this)" oninput="sfNameInput(this)"'
+            + ' style="display:block;width:100%;box-sizing:border-box;padding:9px 12px;font-size:13px;font-family:\'Noto Sans KR\',sans-serif;'
+            + 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);'
+            + 'color:var(--text-tertiary);margin-bottom:10px;">';
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+      z.switches.forEach(function(sw, si) {
+        var swLabel = names[sw.id+'_label'] || sw.defaultLabel || ('스위치 '+(si+1));
+        var isSavedSw = !!names[sw.id+'_label'];
+        var ph = sw.defaultLabel || ('스위치 '+(si+1));
+        html += '<div>'
+              + '<div style="font-size:9px;font-weight:600;color:var(--text-tertiary);margin-bottom:3px;">'+ph+'</div>'
+              + '<input type="text" id="sfname-sw-'+sw.id+'"'
+              + ' value="'+(isSavedSw ? swLabel : '')+'"'
+              + ' placeholder="'+ph+'"'
+              + ' data-saved="'+(isSavedSw ? encodeURIComponent(swLabel) : '')+'"'
+              + ' onfocus="sfNameFocus(this)" oninput="sfNameInput(this)"'
+              + ' style="width:100%;box-sizing:border-box;padding:8px 10px;font-size:12px;font-family:\'Noto Sans KR\',sans-serif;'
+              + 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);'
+              + 'color:var(--text-tertiary);">'
+              + '</div>';
+      });
+      html += '</div></div>';
     });
-    html += '</div>';
-    html += '</div>';
-  });
+  }
+
+  renderSection('메인 탭', SF_ZONE_DEFS);
+  renderSection('육묘 탭', SF2_ZONE_DEFS);
+
   container.innerHTML = html;
-  // 저장 버튼 상태 초기화
   sfNamesBtnReset();
 }
 
@@ -7392,22 +7853,18 @@ function sfNamesReset() {
 
 function sfNamesSave() {
   var names = {};
-  SF_ZONE_DEFS.forEach(function(z) {
+  var allZones = SF_ZONE_DEFS.concat(SF2_ZONE_DEFS);
+  allZones.forEach(function(z) {
     var zEl = document.getElementById('sfname-zone-'+z.key);
-    if (zEl) {
-      var v = zEl.value.trim();
-      if (v) names[z.key+'_name'] = v;
-    }
+    if (zEl) { var v = zEl.value.trim(); if (v) names[z.key+'_name'] = v; }
     z.switches.forEach(function(sw) {
       var sEl = document.getElementById('sfname-sw-'+sw.id);
-      if (sEl) {
-        var v = sEl.value.trim();
-        if (v) names[sw.id+'_label'] = v;
-      }
+      if (sEl) { var v = sEl.value.trim(); if (v) names[sw.id+'_label'] = v; }
     });
   });
   try { localStorage.setItem('pb8_sf_names', JSON.stringify(names)); } catch(e) {}
-  sfNamesRender(); // 저장 후 회색으로 재렌더
+  sfNamesRender();
+  if (typeof showSaveToast === 'function') showSaveToast('이름이 저장되었습니다');
 }
 
 // 수입/지출 탭 상단 통계
@@ -7432,10 +7889,27 @@ function renderIncExpStats() {
     if(pEl){ pEl.textContent=fmt(profit); pEl.style.color=profit<0?'#EF4444':profit>0?'#10B981':'var(--text-primary)'; }
   });
 }
+
+// ── 앱 시작: 모든 JS 로드 완료 후 ──
+document.addEventListener('DOMContentLoaded', function() {
+  _PB8_PREFIX = 'pb8_peakberry_';
+  _currentFarmId = 'peakberry';
+  var saved = pinGetSaved();
+  var lockOn = pinIsLockEnabled();
+  if (!saved || !lockOn) {
+    pinEnterApp();
+  } else {
+    pinShowFaceIdBtn();
+    if (pinIsFaceIdEnabled()) {
+      setTimeout(function() { pinTryFaceId(); }, 400);
+    }
+  }
+});
 </script>
+
 <!-- Firebase App + Messaging SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" onload="window._firebaseAppLoaded=true;window._checkFCMReady&&window._checkFCMReady()"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js" onload="window._firebaseMsgLoaded=true;window._checkFCMReady&&window._checkFCMReady()"></script>
 
 <script>
 // ═══════════════════════════════════════════
@@ -7447,28 +7921,29 @@ var NOTIF_KEY = 'pb8_notif_settings';
 // 알림 설정 기본값
 var NOTIF_TABS = [
   {
-    id: 'smartfarm', label: '🎛️ 제어', items: [
-      { id:'temp_high',   label:'온도 초과 알림',         default:true,  desc:'설정 온도 이상 시' },
-      { id:'rain_detect', label:'우적 센서 감지',          default:true,  desc:'비 감지 시' },
-      { id:'co_detect',   label:'CO 감지 알림',           default:true,  desc:'일산화탄소 감지 시' },
-      { id:'sw_auto',     label:'자동 스위치 작동 알림',   default:false, desc:'자동 규칙으로 스위치 작동 시' },
+    id: 'smartfarm', label: '메인', items: [
+      { id:'temp_high',   label:'온도 초과 알림',        default:true  },
+      { id:'rain_detect', label:'우적 센서 감지 알림',    default:true  },
+      { id:'co_detect',   label:'CO 감지 알림',          default:true  },
+      { id:'sw_auto',     label:'자동 스위치 작동 알림',  default:false },
     ]
   },
   {
-    id: 'smartfarm2', label: '🌿 육묘제어', items: [
-      { id:'temp_high2',   label:'온도 초과 알림',   default:true,  desc:'설정 온도 이상 시' },
-      { id:'rain_detect2', label:'우적 센서 감지',   default:true,  desc:'비 감지 시' },
-      { id:'sw_auto2',     label:'자동 스위치 작동', default:false, desc:'자동 규칙으로 스위치 작동 시' },
+    id: 'smartfarm2', label: '육묘', items: [
+      { id:'temp_high2',   label:'온도 초과 알림',        default:true  },
+      { id:'rain_detect2', label:'우적 센서 감지 알림',   default:true  },
+      { id:'sw_auto2',     label:'자동 스위치 작동 알림', default:false },
+      { id:'seedling_remind', label:'육묘 기록 리마인더', default:true, hasSchedule:true },
     ]
   },
   {
-    id: 'seedling-tab', label: '🌱 육묘', items: [
-      { id:'seedling_remind', label:'오늘의 육묘 기록 알림', default:true, desc:'매일 저녁 9시 알림' },
+    id: 'income', label: '수입', items: [
+      { id:'income_remind', label:'수입 기록 리마인더', default:false, hasSchedule:true },
     ]
   },
   {
-    id: 'irrigation', label: '💧 관수', items: [
-      { id:'irr_remind', label:'관수 기록 알림', default:false, desc:'관수 후 기록 작성 알림' },
+    id: 'expense', label: '지출', items: [
+      { id:'expense_remind', label:'지출 기록 리마인더', default:false, hasSchedule:true },
     ]
   },
 ];
@@ -7496,6 +7971,10 @@ var _fcmToken = null;
 
 function notifInit() {
   try {
+    if (typeof firebase === 'undefined') {
+      console.warn('FCM: Firebase SDK 아직 로드 안 됨');
+      return;
+    }
     if (!firebase.apps.length) {
       firebase.initializeApp({
         apiKey: "AIzaSyC0Zc4seMa9YvG70QUgFuczREPdNoof2cU",
@@ -7550,7 +8029,7 @@ async function notifRequestPermission() {
         window.saveToFirebase('pb8_fcm_token', token);
       }
       notifUpdatePermissionUI();
-      showSaveToast('알림이 활성화되었습니다 🔔');
+      showSaveToast('알림이 활성화되었습니다');
     }
   } catch(e){
     console.error('FCM 토큰 오류:', e);
@@ -7587,27 +8066,64 @@ function notifUpdatePermissionUI() {
   }
 }
 
+function getNotifSchedule(id) {
+  try {
+    var s = getNotifSettings();
+    return s['schedule_'+id] || { days:[0,1,2,3,4,5,6], hour:21 };
+  } catch(e) { return { days:[0,1,2,3,4,5,6], hour:21 }; }
+}
+function saveNotifSchedule(id, schedule) {
+  var s = getNotifSettings();
+  s['schedule_'+id] = schedule;
+  saveNotifSettings(s);
+}
+
 function renderNotifTabSettings() {
   var container = document.getElementById('notif-tab-settings');
   if (!container) return;
-  var s = getNotifSettings();
+  var DAY_LABELS = ['일','월','화','수','목','금','토'];
 
   container.innerHTML = NOTIF_TABS.map(function(tab) {
     var items = tab.items.map(function(item) {
       var checked = isNotifEnabled(item.id);
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--glass-border);">'
-        + '<div style="flex:1;">'
-        + '<div style="font-size:13px;font-weight:500;color:var(--text-primary);">'+item.label+'</div>'
-        + '<div style="font-size:11px;color:var(--text-tertiary);margin-top:1px;">'+item.desc+'</div>'
-        + '</div>'
-        + '<label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;margin-left:12px;">'
+      var toggle = '<label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;margin-left:12px;">'
         + '<input type="checkbox" '+(checked?'checked':'')
         + ' onchange="notifToggleItem(\''+item.id+'\',this.checked)"'
         + ' style="opacity:0;width:0;height:0;">'
         + '<span style="position:absolute;cursor:pointer;inset:0;background:'+(checked?'#059669':'#D1D5DB')+';border-radius:12px;transition:0.2s;">'
         + '<span style="position:absolute;top:3px;left:'+(checked?'23px':'3px')+';width:18px;height:18px;background:white;border-radius:50%;transition:0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span>'
-        + '</span>'
-        + '</label>'
+        + '</span></label>';
+
+      var scheduleHtml = '';
+      if (item.hasSchedule && checked) {
+        var sch = getNotifSchedule(item.id);
+        var dayBtns = DAY_LABELS.map(function(d, i) {
+          var on = sch.days.indexOf(i) >= 0;
+          return '<button onclick="notifToggleDay(\''+item.id+'\','+i+')" '
+            + 'style="width:22px;height:22px;border-radius:50%;font-size:10px;font-weight:600;font-family:\'Noto Sans KR\',sans-serif;cursor:pointer;flex-shrink:0;'
+            + 'border:1px solid '+(on?'#9CA3AF':'var(--glass-border)')+';'
+            + 'background:'+(on?'#374151':'transparent')+';'
+            + 'color:'+(on?'white':'var(--text-tertiary)')+';">'
+            + d + '</button>';
+        }).join('');
+        var hourOpts = '';
+        for (var h=0;h<24;h++) {
+          hourOpts += '<option value="'+h+'"'+(sch.hour===h?' selected':'')+'>'+h+'시</option>';
+        }
+        scheduleHtml = '<div style="margin-top:8px;padding:6px 10px;background:rgba(240,245,252,0.5);border-radius:var(--radius-sm);display:flex;align-items:center;gap:6px;">'
+          + '<span style="font-size:10px;color:var(--text-tertiary);flex-shrink:0;">요일</span>'
+          + dayBtns
+          + '<span style="font-size:10px;color:var(--text-tertiary);flex-shrink:0;margin-left:4px;">시간</span>'
+          + '<select onchange="notifSaveHour(\''+item.id+'\',this.value)" style="font-size:11px;font-family:\'Noto Sans KR\',sans-serif;padding:2px 4px;background:transparent;border:1px solid var(--glass-border);border-radius:var(--radius-sm);color:var(--text-primary);flex-shrink:0;">'
+          + hourOpts + '</select>'
+          + '</div>';
+      }
+
+      return '<div style="padding:10px 0;border-bottom:1px solid var(--glass-border);">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;">'
+        + '<span style="font-size:13px;font-weight:500;color:var(--text-primary);">'+item.label+'</span>'
+        + toggle + '</div>'
+        + scheduleHtml
         + '</div>';
     }).join('');
 
@@ -7616,6 +8132,20 @@ function renderNotifTabSettings() {
       + '<div class="nm-flat" style="padding:0 16px;">' + items + '</div>'
       + '</div>';
   }).join('');
+}
+
+function notifToggleDay(id, day) {
+  var sch = getNotifSchedule(id);
+  var idx = sch.days.indexOf(day);
+  if (idx >= 0) sch.days.splice(idx, 1);
+  else sch.days.push(day);
+  saveNotifSchedule(id, sch);
+  renderNotifTabSettings();
+}
+function notifSaveHour(id, val) {
+  var sch = getNotifSchedule(id);
+  sch.hour = parseInt(val);
+  saveNotifSchedule(id, sch);
 }
 
 function notifToggleItem(itemId, val) {
@@ -7632,7 +8162,7 @@ function showNotifToast(title, body) {
     + 'background:rgba(17,24,39,0.95);backdrop-filter:blur(12px);color:white;'
     + 'border-radius:14px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.3);'
     + 'animation:notif-slide-in 0.3s ease;';
-  toast.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:3px;">🔔 '+title+'</div>'
+  toast.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:3px;">'+title+'</div>'
     + '<div style="font-size:12px;opacity:0.85;">'+body+'</div>';
   document.body.appendChild(toast);
   setTimeout(function(){ toast.style.opacity='0'; toast.style.transition='opacity 0.4s'; setTimeout(function(){ toast.remove(); }, 400); }, 4000);
@@ -7695,33 +8225,50 @@ function notifCheckCo(active) {
   }
 }
 
-// 육묘 기록 리마인더 (하루 1회, 오후 9시)
-function notifCheckSeedlingReminder() {
-  if (!isNotifEnabled('seedling_remind')) return;
+// 리마인더 체크 (스케줄 기반)
+function notifCheckReminder(id, title, body) {
+  if (!isNotifEnabled(id)) return;
   var now = new Date();
-  if (now.getHours() !== 21) return;
+  var sch = getNotifSchedule(id);
+  if (sch.days.indexOf(now.getDay()) < 0) return;
+  if (now.getHours() !== sch.hour) return;
+  var key = 'pb8_notif_'+id+'_last';
   var today = now.toDateString();
-  var lastShown = localStorage.getItem('pb8_notif_seedling_last');
-  if (lastShown === today) return;
-  localStorage.setItem('pb8_notif_seedling_last', today);
-  sendLocalNotif('seedling_remind', '📋 육묘 기록', '오늘의 육묘 기록을 남겨주세요.');
+  if (localStorage.getItem(key) === today) return;
+  localStorage.setItem(key, today);
+  sendLocalNotif(id, title, body);
+}
+
+function notifCheckSeedlingReminder() {
+  notifCheckReminder('seedling_remind', '육묘 기록', '오늘의 육묘 기록을 남겨주세요.');
+}
+function notifCheckIncomeReminder() {
+  notifCheckReminder('income_remind', '수입 기록', '오늘의 수입 내역을 기록해 주세요.');
+}
+function notifCheckExpenseReminder() {
+  notifCheckReminder('expense_remind', '지출 기록', '오늘의 지출 내역을 기록해 주세요.');
 }
 
 // 1분마다 리마인더 체크
-setInterval(notifCheckSeedlingReminder, 60000);
+setInterval(function() {
+  notifCheckSeedlingReminder();
+  notifCheckIncomeReminder();
+  notifCheckExpenseReminder();
+}, 60000);
 
-// renderSettings 후킹 — 설정 탭 열릴 때 알림 UI 렌더
-var _origRenderSettings = typeof renderSettings === 'function' ? renderSettings : null;
-function renderSettings() {
-  if (_origRenderSettings) _origRenderSettings();
-  notifUpdatePermissionUI();
-  renderNotifTabSettings();
-}
+// renderSettings 후킹 제거 — 대신 showTab에서 직접 호출
+// (재귀 방지)
 
-// 초기화
-document.addEventListener('DOMContentLoaded', function() {
+// 초기화 — Firebase SDK 로드 완료 후 실행
+window._checkFCMReady = function() {
+  if (window._firebaseAppLoaded && window._firebaseMsgLoaded) {
+    notifInit();
+  }
+};
+// 이미 로드됐을 경우 대비
+if (window._firebaseAppLoaded && window._firebaseMsgLoaded) {
   notifInit();
-});
+}
 
 // CSS 애니메이션
 var notifStyle = document.createElement('style');
