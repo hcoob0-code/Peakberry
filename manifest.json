@@ -1,0 +1,25 @@
+{
+  "name": "피크베리 농장",
+  "short_name": "피크베리",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EEF3F8",
+  "theme_color": "#EEF3F8",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
