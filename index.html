@@ -553,22 +553,21 @@ canvas { max-width: 100%; }
 .sf-switch-grid-1 { display: grid; grid-template-columns: 1fr; gap: 5px; }
 /* ── 2-way On/Off 토글 ── */
 .sf-sw2 {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 8px 4px 6px; background: rgba(249,250,251,0.75); border: 1.5px solid rgba(209,213,219,0.6);
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 4px 5px; background: rgba(249,250,251,0.75); border: 1.5px solid rgba(209,213,219,0.6);
   border-radius: 12px; cursor: pointer; user-select: none;
   -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
   touch-action: pan-y; min-width: 0;
 }
-.sf-sw2.on {
-  background: rgba(249,250,251,0.75); border-color: rgba(209,213,219,0.6);
-}
+.sf-sw2.on { background: rgba(249,250,251,0.75); border-color: rgba(209,213,219,0.6); }
 .sf-sw2-num { font-size: 10px; font-weight: 800; color: #9CA3AF; text-align: center; }
 .sf-sw2-track {
-  width: 44px; height: 24px; border-radius: 12px;
+  width: 44px; height: 22px; border-radius: 11px;
   background: #F3F4F6; position: relative;
   transition: background 0.25s; border: 1.5px solid #D1D5DB;
 }
-.sf-sw2.on .sf-sw2-track { background: #DCFCE7; border-color: #86EFAC; }.sf-sw2-knob {
+.sf-sw2.on .sf-sw2-track { background: #DCFCE7; border-color: #86EFAC; }
+.sf-sw2-knob {
   position: absolute; top: 2px; left: 2px;
   width: 17px; height: 17px; border-radius: 50%;
   background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.22);
@@ -587,8 +586,8 @@ canvas { max-width: 100%; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px 4px 6px;
+  gap: 3px;
+  padding: 6px 4px 5px;
   background: rgba(249,250,251,0.75); border: 1.5px solid rgba(209,213,219,0.6);
   border-radius: 12px;
   cursor: pointer;
@@ -616,11 +615,11 @@ canvas { max-width: 100%; }
 /* ── 3-way 트랙 ── */
 .sf-track-wrap {
   position: relative;
-  width: 100%; max-width: 60px; height: 26px;
+  width: 100%; max-width: 60px; height: 22px;
 }
 .sf-track-bg {
   position: absolute; inset: 0;
-  border-radius: 13px;
+  border-radius: 11px;
   background: #F3F4F6;
   border: 1.5px solid #D1D5DB;
   transition: background 0.25s, border-color 0.25s;
@@ -638,16 +637,16 @@ canvas { max-width: 100%; }
   opacity: 0;
   transition: opacity 0.2s;
 }
-.sf-track-txt.txt-open  { left: 4px;  color: #16A34A; }
+.sf-track-txt.txt-open  { left: 8px;  color: #16A34A; }
 .sf-sw.on  .sf-track-txt.txt-open  { opacity: 1; }
-.sf-track-txt.txt-close { right: 4px; color: #E11D48; }
+.sf-track-txt.txt-close { right: 8px; color: #E11D48; }
 .sf-sw.off .sf-track-txt.txt-close { opacity: 1; }
 
 /* 노브 */
 .sf-knob {
   position: absolute;
   top: 2px; left: 2px;
-  width: 20px; height: 20px;
+  width: 17px; height: 17px;
   border-radius: 50%;
   background: white;
   box-shadow: 0 1px 4px rgba(0,0,0,0.22);
@@ -655,17 +654,9 @@ canvas { max-width: 100%; }
   will-change: left;
   display: flex; align-items: center; justify-content: center;
 }
-.sf-knob-txt {
-  font-size: 5px; font-weight: 800;
-  color: #9CA3AF; white-space: nowrap;
-  opacity: 0; transition: opacity 0.15s;
-  pointer-events: none; line-height: 1;
-  font-family: 'Noto Sans KR', sans-serif;
-}
-.sf-sw.stop .sf-knob-txt { opacity: 1; }
 .sf-sw.off  .sf-knob { left: 2px; }
-.sf-sw.stop .sf-knob { left: calc(50% - 10px); }
-.sf-sw.on   .sf-knob { left: calc(100% - 22px); }
+.sf-sw.stop .sf-knob { left: calc(50% - 9px); }
+.sf-sw.on   .sf-knob { left: calc(100% - 19px); }
 
 /* ── 자동 규칙 빌더 ── */
 .sf-rule-card {
@@ -705,10 +696,10 @@ canvas { max-width: 100%; }
 .sf-mode-toggle {
   display: flex; border-radius: 50px; overflow: hidden;
   border: 1px solid var(--glass-border); background: rgba(240,245,252,0.55);
-  flex-shrink: 0; height: 26px; align-items: center;
+  flex-shrink: 0; height: 20px; align-items: center;
 }
 .sf-mode-btn {
-  height: 26px; padding: 0 11px; font-size: 10px; font-weight: 700;
+  height: 20px; padding: 0 9px; font-size: 10px; font-weight: 700;
   font-family: 'Noto Sans KR', sans-serif; cursor: pointer;
   background: transparent; border: none; color: var(--text-tertiary);
   transition: all 0.15s; white-space: nowrap;
@@ -774,8 +765,8 @@ canvas { max-width: 100%; }
 .sf-env-bar {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr auto;
-  gap: 6px;
-  padding: 6px 4px;
+  gap: 4px;
+  padding: 4px 4px;
   background: transparent;
   border: none;
   border-radius: 0;
@@ -783,10 +774,10 @@ canvas { max-width: 100%; }
   align-items: center;
   box-shadow: none;
 }
-.sf-env-cell { text-align: center; }
-.sf-env-label { font-size: 9px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 2px; }
-.sf-env-val   { font-size: 15px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
-.sf-env-unit  { font-size: 8px; color: var(--text-tertiary); margin-top: 1px; }
+.sf-env-cell { text-align: center; line-height: 1; }
+.sf-env-label { font-size: 8px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 1px; }
+.sf-env-val   { font-size: 13px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; display: inline; }
+.sf-env-unit  { font-size: 8px; color: var(--text-tertiary); margin-left: 1px; display: inline; }
 
 /* 전원 상태바 - 배경 박스 없이 플랫 */
 .sf-status-bar {
@@ -815,7 +806,7 @@ canvas { max-width: 100%; }
 .sf-zone-btns { display: flex; gap: 3px; flex-wrap: nowrap; flex-shrink: 0; }
 .sf-zone-btn {
   font-size: 8px; font-weight: 700;
-  height: 26px; padding: 0 8px;
+  height: 20px; padding: 0 7px;
   border-radius: 50px; white-space: nowrap;
   border: 1px solid rgba(229,231,235,0.7); background: rgba(249,250,251,0.75); color: #6B7280;
   font-family: 'Noto Sans KR', sans-serif; cursor: pointer;
