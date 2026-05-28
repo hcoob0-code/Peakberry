@@ -924,7 +924,7 @@ canvas { max-width: 100%; }
     </div>
   </div>
   <div style="text-align:right;line-height:1.2;flex-shrink:0;">
-    <div style="font-size:6pt;color:var(--text-tertiary);opacity:0.3;">Version 1.1.0 - 20260501</div>
+    <div style="font-size:6pt;color:var(--text-tertiary);opacity:0.3;">Version 1.2.0 - 20260528</div>
     <div id="sync-status-local" style="font-size:7px;font-family:'Noto Sans KR',sans-serif;font-weight:600;color:var(--text-tertiary);transition:color 0.3s;">로컬 저장됨</div>
     <div id="sync-status-remote" style="font-size:7px;font-family:'Noto Sans KR',sans-serif;font-weight:600;color:var(--text-tertiary);transition:color 0.3s;">클라우드 대기</div>
   </div>
@@ -3076,8 +3076,20 @@ function renderPinSettings() {
   }).catch(function() {});
 }
 
-// ── 앱 시작 (모든 JS 로드 후 실행) ──
-// → 파일 맨 끝 DOMContentLoaded에서 호출됨
+// ── Service Worker 강제 업데이트 ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(regs) {
+    regs.forEach(function(reg) { reg.update(); });
+  });
+}
+// 캐시 버스팅
+if ('caches' in window) {
+  caches.keys().then(function(names) {
+    names.forEach(function(name) {
+      if (!name.includes('firebase')) caches.delete(name);
+    });
+  });
+}
 
 // 기존 코드 호환 스텁
 function doLogin(){}
